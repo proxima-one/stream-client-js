@@ -11,8 +11,8 @@
     "copy-content-files": "copyfiles -u 1 src/**/*.proto dist/ && copyfiles -u 1 src/**/*.js dist/",
     "compile": "tsc --build",
     "lint": "yarn run eslint",
-    "test": "yarn jest \".*\\.(spec|test)\\.ts$\" --coverage",
-    "test:e2e": "yarn jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
+    "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
+    "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
     "pub": "yarn publish"
   },
   "author": "proxima.one",
