@@ -1,0 +1,16 @@
+DS_Store
+.idea
+.editorconfig
+.gitignore
+**/node_modules
+**/dist
+coverage
+Dockerfile
+.dockerignore
+**/*.tsbuildinfo
+build.sh
+.env
+**/.tmp
+deployment
+node_modules
+*.log

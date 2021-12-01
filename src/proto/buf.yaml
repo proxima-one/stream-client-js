@@ -1,0 +1,8 @@
+version: v1
+name: buf.build/proximaone/stream_client_js
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE
