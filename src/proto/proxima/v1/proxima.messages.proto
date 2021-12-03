@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proxima.streams.v1alpha1;
+package proxima.streamapis.v1alpha1;
 
 import "google/protobuf/timestamp.proto";
 

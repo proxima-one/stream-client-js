@@ -10,6 +10,7 @@
     "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo",
     "copy-content-files": "copyfiles -u 1 src/**/*.proto dist/ && copyfiles -u 1 src/**/*.js dist/",
     "compile": "tsc --build",
+    "push": "buf push ./src/proto",
     "lint": "yarn run eslint",
     "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
     "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
