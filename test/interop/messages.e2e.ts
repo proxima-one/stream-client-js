@@ -1,51 +1,62 @@
 import { ChannelCredentials, credentials } from "@grpc/grpc-js";
-import {ProximaStreamsServiceClient} from "../../src"
+import {ProximaService, ProximaServiceTypes, StreamClient} from "../../src/"
+
+
+
 
 describe("proxima streams e2e", () => {
 
   describe("Proxima Stream Consume Messages", () => {
     let IsConnected: boolean
-    let streamClient: ProximaStreamsServiceClient
+    let streamClient: ProximaService.MessagesServiceClient
 
     beforeAll(() => {
       const streamAddress = "streamdb.cluster.prod.proxima.one:443"
       const streamCredentials = credentials.createInsecure()
-      streamClient = new ProximaStreamsServiceClient(streamAddress, streamCredentials)
+      const streamSecureCredentials = credentials.createSsl()
+      streamClient = new ProximaService.MessagesServiceClient(streamAddress, streamSecureCredentials)
       IsConnected = true
     });
   
-    afterAll(() => {});
+    afterAll(() => {
+    });
 
-    it("Should be connecting to the endpoints", () => {
+    it("Should be connecting to the endpoints", (done) => {
       expect(IsConnected).toBeTruthy()
-      console.log(streamClient)
+      expect(streamClient).toBeTruthy()
+      done()
+      //streamClient.waitForReady()
     });
 
-    it("should be able to consume messages at start point from stream endpoint", async () => {
+    it("should be able to consume messages at start point from stream endpoint", (done) => {
       jest.setTimeout(100 * 1000);
-      const starting = 10000000
+      let streamId = "multiplefi"
+      let latest = ""
+      let request = new ProximaServiceTypes.StreamMessagesRequest()
+        .setStreamId(streamId)
+        .setLastMessageId(latest)
 
+      let messageStream = streamClient.streamMessages(request)
+      messageStream.on("data", (data) => {
+        done()
+      })
+    });
+
+    it("should query blocks range", (done) => {
+      jest.setTimeout(100 * 1000);
+      let streamId = "multiplefi"
+      let latest = ""
+      let messageCount = 100
+      let request = new ProximaServiceTypes.GetNextMessagesRequest()
+        .setStreamId(streamId)
+        .setLastMessageId(latest)
+        .setCount(messageCount)
       
-      throw new Error("Not implemented")
-      //const response = await QueryExecutor.execute(web3, query);
-      // expect(response.blockHeaders).toHaveLength(1);
-      // const firstBlock = response.blockHeaders[0];
-      // expect(firstBlock.number).toBe(0);
-      // expect(response).toMatchSnapshot();
-    });
-
-    it("should query blocks range", async () => {
-      jest.setTimeout(100 * 1000);
-
-      throw new Error("Not implemented")
-      // const query = core.BlockHeadersQuery.create(1000000, 100);
-      // const response = await QueryExecutor.execute(web3, query);
-
-      // expect(response.blockHeaders).toHaveLength(query.count);
-      // for (let i = 0; i < response.blockHeaders.length; i++) {
-      //   expect(response.blockHeaders[i].number).toBe(query.from + i);
-      // }
-      // expect(response).toMatchSnapshot();
+      streamClient.getNextMessages(request, (serviceError, responses) => {
+        expect(serviceError).toBeFalsy()
+        expect(responses).toMatchSnapshot();
+        done()
+      })
     });
   });
 });
