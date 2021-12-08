@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "lib": ["ES2019"],
     "resolveJsonModule": true,
     "module": "commonjs",
@@ -19,7 +20,11 @@
     "baseUrl": "."
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/__mocks__/*",
+    "**/__tests__/*",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ],
   "include": [
     "src/**/*",

@@ -6,8 +6,8 @@ StreamDB Client requires [Node.js](https://nodejs.org/) v12+ to run.
 
 Install following packages globally
 ```sh
-yarn add -g grpc-tools
-yarn add -g grpc_tools_node_protoc_ts
+yarn global add grpc-tools
+yarn global add grpc_tools_node_protoc_ts
 ```
 
 Install the dependencies and devDependencies and start the server.
