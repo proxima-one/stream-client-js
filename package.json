@@ -1,6 +1,6 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -38,12 +38,10 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.4.2",
-    "commander": "^8.3.0",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
     "google-protobuf": "^3.19.0",
     "grpc": "^1.24.11",
-    "lodash": "^4.17.21",
     "rxjs": "^7.1.0"
   }
 }
