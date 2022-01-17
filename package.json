@@ -1,6 +1,6 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -28,12 +28,12 @@
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
     "copyfiles": "^2.4.1",
-    "prettier": "^2.5.1",
     "eslint": "7.24.0",
     "fs-extra": "^9.1.0",
     "jest": "^27.3.1",
     "js-yaml": "^4.1.0",
     "loadash": "^1.0.0",
+    "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.7",
     "ts-node": "^10.3.1",
