@@ -1,13 +1,20 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "0.2.0",
-  "description": "",
+  "version": "0.2.2",
+  "description": "Client to Proxima StreamDB",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "lib"
+  ],
+  "author": "proxima.one",
+  "license": "MIT",
   "scripts": {
     "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo && rimraf coverage",
     "format": "prettier --write \"{src,test}/**/*.ts\" --double-quote --trailing-comma es5",
     "lint": "eslint . --ext .ts",
-    "copy-content-files": "copyfiles -u 1 src/**/*.proto dist/ && copyfiles -u 1 src/**/*.js dist/",
+    "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js dist/",
     "compile": "tsc --build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile && yarn copy-content-files",
@@ -17,8 +24,6 @@
     "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
     "pub": "yarn publish"
   },
-  "author": "proxima.one",
-  "license": "MIT",
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
     "@types/fs-extra": "^9.0.11",
