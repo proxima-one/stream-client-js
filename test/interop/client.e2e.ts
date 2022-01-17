@@ -10,6 +10,7 @@ function decodeJson(binary: Uint8Array | string): any {
       : Buffer.from(binary);
   return JSON.parse(buffer.toString("utf8"));
 }
+
 describe("StreamClient", () => {
   let client: StreamClient;
   beforeEach(() => {
