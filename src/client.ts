@@ -17,7 +17,8 @@ export class StreamClient {
         let request = new ProximaServiceTypes.StreamMessagesRequest()
         .setStreamId(streamId)
         .setLastMessageId(latest)
-        return this.client.streamMessages(request)
+       let clientStream = this.client.streamMessages(request)
+       return clientStream
     }
 
     public async getNextMessages(streamId: string, latest: string, messageCount: number): Promise<ProximaServiceTypes.GetNextMessagesResponse> {
