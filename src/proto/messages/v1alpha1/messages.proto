@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proxima.streams.v1alpha1;
+package messages.v1alpha1;
 
 import "google/protobuf/timestamp.proto";
 
@@ -42,7 +42,7 @@ message StreamMessagesResponse {
   repeated StreamMessage messages = 1;
 }
 
-service ProximaStreamsService {
+service MessagesService {
   // returns requested amount of messages starting from any message
   rpc GetNextMessages(GetNextMessagesRequest) returns (GetNextMessagesResponse) {}
   // returns existing messages as an undefinite stream starting from any message

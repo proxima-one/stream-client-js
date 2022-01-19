@@ -1,5 +1,5 @@
-// package: proxima.streams.v1alpha1
-// file: proto/proxima/v1/proxima.messages.proto
+// package: proxima.streamapis.v1alpha1
+// file: proxima/v1/proxima.messages.proto
 
 /* tslint:disable */
 /* eslint-disable */

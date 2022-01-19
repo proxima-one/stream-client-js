@@ -1,18 +1,18 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "prepack": "yarn build",
-    "dev": "ts-node src/index.ts",
     "build": "yarn clean && yarn compile && yarn copy-content-files",
     "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo",
     "copy-content-files": "copyfiles -u 1 src/**/*.proto dist/ && copyfiles -u 1 src/**/*.js dist/",
     "compile": "tsc --build",
+    "push": "buf push ./src/proto",
     "lint": "yarn run eslint",
-    "test": "yarn jest \".*\\.(spec|test)\\.ts$\" --coverage",
-    "test:e2e": "yarn jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
+    "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
+    "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
     "pub": "yarn publish"
   },
   "author": "proxima.one",
@@ -38,15 +38,10 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.4.2",
-    "commander": "^8.3.0",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
     "google-protobuf": "^3.19.0",
     "grpc": "^1.24.11",
-    "grpc_tools_node_protoc_ts": "^5.3.2",
-    "lodash": "^4.17.21",
-    "rxjs": "^7.1.0",
-    "ts-proto": "^1.92.0",
-    "web3": "^1.5.2"
+    "rxjs": "^7.1.0"
   }
 }

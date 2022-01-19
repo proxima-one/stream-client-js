@@ -1,9 +1,9 @@
 version: v1
 
 plugins:
-  # - name: js
-  #   out: src/gen
-  #   opt: import_style=commonjs,binary
+  - name: js
+    out: src/gen
+    opt: import_style=commonjs,binary
 
   - name: grpc
     out: src/gen

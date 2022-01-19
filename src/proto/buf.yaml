@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/proximaone/stream_client_js
+name: buf.build/proximaone/streamapis
 lint:
   use:
     - DEFAULT
