@@ -50,7 +50,7 @@ export class StreamClient {
 
     if (latest != undefined) request = request.setLastMessageId(latest);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<GetNextMessagesResponse>((resolve, reject) => {
       this.client.getNextMessages(
         request,
         this.authMeta(),
