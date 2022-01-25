@@ -1,5 +1,5 @@
 import { StreamClient } from "../../src";
-import { firstValueFrom, flatMap, take, toArray } from "rxjs";
+import { firstValueFrom, map, take, toArray } from "rxjs";
 
 const testEndpoint = "streamdb.cluster.prod.proxima.one:443";
 
@@ -20,7 +20,7 @@ describe("StreamClient", () => {
   it("should fetch eth block headers", async () => {
     const blockHeadersResponse = await client.getNextMessages(
       "eth-main-headers",
-      10
+      { messageCount: 10 }
     );
     const blockHeaders = blockHeadersResponse.messagesList.map((x) =>
       decodeJson(x.payload)
@@ -32,11 +32,7 @@ describe("StreamClient", () => {
   it("should stream eth block headers", async () => {
     const blockHeadersStream = client
       .streamMessages("eth-main-headers")
-      .pipe(
-        flatMap((response) =>
-          response.messagesList.map((x) => decodeJson(x.payload))
-        )
-      );
+      .pipe(map((message) => decodeJson(message.payload)));
 
     const firstBlockHeaders = await firstValueFrom(
       blockHeadersStream.pipe(take(10), toArray())

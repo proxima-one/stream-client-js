@@ -1,7 +1,9 @@
 import * as grpc from "@grpc/grpc-js";
 import * as ProximaService from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
 import * as ProximaServiceTypes from "./gen/proto/messages/v1alpha1/messages_pb";
-import { map, Observable } from "rxjs";
+import { mergeMap, Observable } from "rxjs";
+import { StreamMessage } from "./gen/proto/messages/v1alpha1/messages_pb";
+import * as proto_messages_v1alpha1_messages_pb from "./gen/proto/messages/v1alpha1/messages_pb";
 
 export type StreamMessagesResponse =
   ProximaServiceTypes.StreamMessagesResponse.AsObject;
@@ -27,28 +29,34 @@ export class StreamClient {
 
   public streamMessages(
     streamId: string,
-    latest?: string
-  ): Observable<StreamMessagesResponse> {
+    opts: { latest?: string } = {}
+  ): Observable<StreamMessage.AsObject> {
     let request = new ProximaServiceTypes.StreamMessagesRequest().setStreamId(
       streamId
     );
 
-    if (latest != undefined) request = request.setLastMessageId(latest);
+    if (opts.latest != undefined)
+      request = request.setLastMessageId(opts.latest);
 
     const stream = this.client.streamMessages(request, this.authMeta());
-    return toObservable(stream).pipe(map((x) => x.toObject()));
+    return toObservable<proto_messages_v1alpha1_messages_pb.StreamMessagesResponse>(
+      stream
+    ).pipe(mergeMap((x) => x.toObject().messagesList.flat()));
   }
 
   public async getNextMessages(
     streamId: string,
-    messageCount: number,
-    latest?: string
+    opts: {
+      messageCount?: number;
+      latest?: string;
+    } = {}
   ): Promise<GetNextMessagesResponse> {
     let request = new ProximaServiceTypes.GetNextMessagesRequest()
       .setStreamId(streamId)
-      .setCount(messageCount);
+      .setCount(opts.messageCount ?? 100);
 
-    if (latest != undefined) request = request.setLastMessageId(latest);
+    if (opts.latest != undefined)
+      request = request.setLastMessageId(opts.latest);
 
     return new Promise<GetNextMessagesResponse>((resolve, reject) => {
       this.client.getNextMessages(
