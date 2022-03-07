@@ -1,7 +1,7 @@
 import { StreamClient } from "../../src";
 import { firstValueFrom, map, take, toArray } from "rxjs";
 
-const testEndpoint = "streamdb.cluster.prod.proxima.one:443";
+const testEndpoint = "streams.proxima.one:443";
 
 function decodeJson(binary: Uint8Array | string): any {
   const buffer =
@@ -29,9 +29,9 @@ describe("StreamClient", () => {
     expect(blockHeaders).toMatchSnapshot();
   });
 
-  it("should stream eth block headers", async () => {
+  it("should stream events", async () => {
     const blockHeadersStream = client
-      .streamMessages("eth-main-headers")
+      .streamMessages("eth-main-blockheader.streams.proxima.one")
       .pipe(map((message) => decodeJson(message.payload)));
 
     const firstBlockHeaders = await firstValueFrom(

@@ -2,13 +2,14 @@ import * as grpc from "@grpc/grpc-js";
 import * as ProximaService from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
 import * as ProximaServiceTypes from "./gen/proto/messages/v1alpha1/messages_pb";
 import { mergeMap, Observable } from "rxjs";
-import { StreamMessage } from "./gen/proto/messages/v1alpha1/messages_pb";
 import * as proto_messages_v1alpha1_messages_pb from "./gen/proto/messages/v1alpha1/messages_pb";
 
 export type StreamMessagesResponse =
   ProximaServiceTypes.StreamMessagesResponse.AsObject;
 export type GetNextMessagesResponse =
   ProximaServiceTypes.GetNextMessagesResponse.AsObject;
+
+export type StreamMessage = ProximaServiceTypes.StreamMessage.AsObject;
 
 export class StreamClient {
   private client: ProximaService.MessagesServiceClient;
@@ -20,17 +21,18 @@ export class StreamClient {
     const credentials = secure
       ? grpc.credentials.createSsl()
       : grpc.credentials.createInsecure();
-    this.client = new ProximaService.MessagesServiceClient(
-      uri,
-      credentials,
-      {}
-    );
+    this.client = new ProximaService.MessagesServiceClient(uri, credentials, {
+      // "grpc.keepalive_timeout_ms": 1 * 1000,
+      // "grpc.keepalive_time_ms": 100 * 1000,
+      // "grpc.keepalive_permit_without_calls": 1,
+      "grpc.max_receive_message_length": 100 * 1024 * 1024,
+    });
   }
 
   public streamMessages(
     streamId: string,
     opts: { latest?: string } = {}
-  ): Observable<StreamMessage.AsObject> {
+  ): Observable<StreamMessage> {
     let request = new ProximaServiceTypes.StreamMessagesRequest().setStreamId(
       streamId
     );
