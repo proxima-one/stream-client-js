@@ -22,9 +22,9 @@ export class StreamClient {
       ? grpc.credentials.createSsl()
       : grpc.credentials.createInsecure();
     this.client = new ProximaService.MessagesServiceClient(uri, credentials, {
-      // "grpc.keepalive_timeout_ms": 1 * 1000,
-      // "grpc.keepalive_time_ms": 100 * 1000,
-      // "grpc.keepalive_permit_without_calls": 1,
+      "grpc.keepalive_timeout_ms": 1 * 1000,
+      "grpc.keepalive_time_ms": 10 * 1000,
+      "grpc.keepalive_permit_without_calls": 1,
       "grpc.max_receive_message_length": 100 * 1024 * 1024,
     });
   }
@@ -40,6 +40,7 @@ export class StreamClient {
     if (opts.latest != undefined)
       request = request.setLastMessageId(opts.latest);
 
+    console.debug(`creating grpc stream ${streamId}, ${opts.latest}`);
     const stream = this.client.streamMessages(request, this.authMeta());
     return toObservable<proto_messages_v1alpha1_messages_pb.StreamMessagesResponse>(
       stream
