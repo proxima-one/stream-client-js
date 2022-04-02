@@ -1,44 +1,42 @@
-import { StreamClient, StreamMessage } from "./client";
+import { State, Transition, StreamStateRef } from "./model";
 import {
   bufferTime,
   catchError,
   filter,
   firstValueFrom,
-  Observable,
   take,
   timeout,
   TimeoutError,
   of,
 } from "rxjs";
+import { ProximaStreamsClient } from "./client";
 
 // temporary solution, will be generalized using common proxima-streaming package once open sourced
 export class StreamReader {
   bufferTimeInterval = 10 as const;
 
+  private lastState: State;
   public constructor(
-    private readonly client: StreamClient,
+    private readonly client: ProximaStreamsClient,
     private readonly streamId: string,
-    private lastMessageId?: string
-  ) {}
+    fromState: State
+  ) {
+    this.lastState = fromState;
+  }
 
   public async tryRead(
     maxCount: number,
     timeoutMs: number
-  ): Promise<StreamMessage[]> {
-    const storedMessages = (
-      await this.client.getNextMessages(this.streamId, {
-        latest: this.lastMessageId,
-        messageCount: maxCount,
-      })
-    ).messagesList;
+  ): Promise<Transition[]> {
+    const stateChanges = await this.client.getTransitionsAfter(new StreamStateRef(this.streamId, this.lastState), maxCount);
 
-    if (storedMessages.length > 0) {
-      this.lastMessageId = storedMessages[storedMessages.length - 1].id;
-      return storedMessages;
+    if (stateChanges.length > 0) {
+      this.lastState = stateChanges[stateChanges.length - 1].newState;
+      return stateChanges;
     }
 
-    const liveMessagesStream = this.client
-      .streamMessages(this.streamId, { latest: this.lastMessageId })
+    const liveStream = this.client
+      .streamTransitionsAfter(new StreamStateRef(this.streamId, this.lastState))
       .pipe(
         timeout({ first: timeoutMs }),
         bufferTime(this.bufferTimeInterval, this.bufferTimeInterval, maxCount),
@@ -46,19 +44,19 @@ export class StreamReader {
         take(1)
       );
 
-    const firstMessages = await firstValueFrom(
-      liveMessagesStream.pipe(
+    const firstLiveStateChanges = await firstValueFrom(
+      liveStream.pipe(
         catchError((err) => {
           if (err instanceof TimeoutError) return of([]);
-          console.debug("streamMessages error occurred", err);
+          console.debug("stream error occurred", err);
           return of([]);
         })
       )
     );
 
-    if (firstMessages.length > 0) {
-      this.lastMessageId = firstMessages[firstMessages.length - 1].id;
-      return firstMessages;
+    if (firstLiveStateChanges.length > 0) {
+      this.lastState = firstLiveStateChanges[firstLiveStateChanges.length - 1].newState;
+      return firstLiveStateChanges;
     }
 
     return [];

@@ -1,38 +1,26 @@
-import { StreamClient } from "../../src";
+import { ProximaStreamsClient, State, StreamStateRef } from "../../src";
 import { firstValueFrom, map, take, toArray } from "rxjs";
 
 const testEndpoint = "streams.proxima.one:443";
 
-function decodeJson(binary: Uint8Array | string): any {
-  const buffer =
-    typeof binary == "string"
-      ? Buffer.from(binary, "base64")
-      : Buffer.from(binary);
-  return JSON.parse(buffer.toString("utf8"));
-}
-
 describe("StreamClient", () => {
-  let client: StreamClient;
+  let client: ProximaStreamsClient;
   beforeEach(() => {
-    client = new StreamClient(testEndpoint);
+    client = new ProximaStreamsClient(testEndpoint);
   });
 
   it("should fetch eth block headers", async () => {
-    const blockHeadersResponse = await client.getNextMessages(
-      "eth-main-headers",
-      { messageCount: 10 }
-    );
-    const blockHeaders = blockHeadersResponse.messagesList.map((x) =>
-      decodeJson(x.payload)
+    const blockHeaderTransitions = await client.getTransitionsAfter(
+      new StreamStateRef("eth-main-blockheader.streams.proxima.one", State.genesis), 10
     );
 
-    expect(blockHeaders).toMatchSnapshot();
+    expect(blockHeaderTransitions.map(x => x.event.payloadAsJson)).toMatchSnapshot();
   });
 
   it("should stream events", async () => {
     const blockHeadersStream = client
-      .streamMessages("eth-main-blockheader.streams.proxima.one")
-      .pipe(map((message) => decodeJson(message.payload)));
+      .streamTransitionsAfter(new StreamStateRef("eth-main-blockheader.streams.proxima.one", State.genesis))
+      .pipe(map((x) => x.event.payloadAsJson));
 
     const firstBlockHeaders = await firstValueFrom(
       blockHeadersStream.pipe(take(10), toArray())

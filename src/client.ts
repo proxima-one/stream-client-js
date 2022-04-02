@@ -1,22 +1,19 @@
 import * as grpc from "@grpc/grpc-js";
+import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
 import * as ProximaService from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
 import * as ProximaServiceTypes from "./gen/proto/messages/v1alpha1/messages_pb";
+import { MessagesServiceClient } from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
 import { mergeMap, Observable } from "rxjs";
-import * as proto_messages_v1alpha1_messages_pb from "./gen/proto/messages/v1alpha1/messages_pb";
+import { Event, State, Transition, StreamStateRef, Timestamp } from "./model";
+import { StreamMessage, StreamMessagesResponse } from "./gen/proto/messages/v1alpha1/messages_pb";
 
-export type StreamMessagesResponse =
-  ProximaServiceTypes.StreamMessagesResponse.AsObject;
-export type GetNextMessagesResponse =
-  ProximaServiceTypes.GetNextMessagesResponse.AsObject;
+export class ProximaStreamsClient {
+  private client: MessagesServiceClient;
 
-export type StreamMessage = ProximaServiceTypes.StreamMessage.AsObject;
-
-export class StreamClient {
-  private client: ProximaService.MessagesServiceClient;
-  private readonly authorization: string;
-
-  public constructor(uri: string, auth: string = "") {
-    this.authorization = auth;
+  public constructor(
+    private readonly uri: string,
+    private readonly auth: string = ""
+  ) {
     const secure = uri.includes(":443");
     const credentials = secure
       ? grpc.credentials.createSsl()
@@ -29,39 +26,35 @@ export class StreamClient {
     });
   }
 
-  public streamMessages(
-    streamId: string,
-    opts: { latest?: string } = {}
-  ): Observable<StreamMessage> {
-    let request = new ProximaServiceTypes.StreamMessagesRequest().setStreamId(
-      streamId
-    );
+  public streamTransitionsAfter(
+    streamStateRef: StreamStateRef,
+  ): Observable<Transition> {
+    let request = new ProximaServiceTypes.StreamMessagesRequest();
+    request.setStreamId(streamStateRef.stream);
 
-    if (opts.latest != undefined)
-      request = request.setLastMessageId(opts.latest);
+    if (!streamStateRef.state.isGenesis)
+      request = request.setLastMessageId(streamStateRef.state.id);
 
-    console.debug(`creating grpc stream ${streamId}, ${opts.latest}`);
+    console.debug(`creating grpc stream ${streamStateRef.stream}, ${streamStateRef.state.id}`);
     const stream = this.client.streamMessages(request, this.authMeta());
-    return toObservable<proto_messages_v1alpha1_messages_pb.StreamMessagesResponse>(
+
+    return toObservable<StreamMessagesResponse>(
       stream
-    ).pipe(mergeMap((x) => x.toObject().messagesList.flat()));
+    ).pipe(mergeMap((x) => x.getMessagesList().flat().map(streamMessageToModel)));
   }
 
-  public async getNextMessages(
-    streamId: string,
-    opts: {
-      messageCount?: number;
-      latest?: string;
-    } = {}
-  ): Promise<GetNextMessagesResponse> {
+  public async getTransitionsAfter(
+    streamStateRef: StreamStateRef,
+    count: number,
+  ): Promise<Transition[]> {
     let request = new ProximaServiceTypes.GetNextMessagesRequest()
-      .setStreamId(streamId)
-      .setCount(opts.messageCount ?? 100);
+      .setStreamId(streamStateRef.stream)
+      .setCount(count);
 
-    if (opts.latest != undefined)
-      request = request.setLastMessageId(opts.latest);
+    if (!streamStateRef.state.isGenesis)
+      request = request.setLastMessageId(streamStateRef.state.id);
 
-    return new Promise<GetNextMessagesResponse>((resolve, reject) => {
+    return new Promise<Transition[]>((resolve, reject) => {
       this.client.getNextMessages(
         request,
         this.authMeta(),
@@ -73,7 +66,7 @@ export class StreamClient {
             reject(err);
             return;
           }
-          resolve(response.toObject());
+          resolve(response.getMessagesList().map(streamMessageToModel));
         }
       );
     });
@@ -81,9 +74,22 @@ export class StreamClient {
 
   private authMeta(): grpc.Metadata {
     const meta = new grpc.Metadata();
-    meta.add("authorization", "Bearer " + this.authorization);
+    meta.add("authorization", "Bearer " + this.auth);
     return meta;
   }
+}
+
+function streamMessageToModel(msg: StreamMessage): Transition {
+  return new Transition(
+    new State(msg.getId()),
+    new Event(msg.getPayload_asU8(),
+      timestampToModel(msg.getTimestamp()!),
+      msg.getHeader()!.getUndo())
+  );
+}
+
+function timestampToModel(timestamp: google_protobuf_timestamp_pb.Timestamp): Timestamp {
+  return Timestamp.fromEpochMs(timestamp.getSeconds() * 1e3 + Math.floor(timestamp.getNanos() / 1e3));
 }
 
 function toObservable<T>(
