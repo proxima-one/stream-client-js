@@ -12,7 +12,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo && rimraf coverage",
-    "format": "prettier --write \"{src,test}/**/*.ts\" --double-quote --trailing-comma es5",
+    "format": "prettier --write \"{src,test}/**/*.ts\" \"!src/gen/**\" --double-quote --trailing-comma es5",
     "lint": "eslint . --ext .ts",
     "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js dist/",
     "compile": "tsc --build",

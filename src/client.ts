@@ -5,7 +5,10 @@ import * as ProximaServiceTypes from "./gen/proto/messages/v1alpha1/messages_pb"
 import { MessagesServiceClient } from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
 import { mergeMap, Observable } from "rxjs";
 import { Event, State, Transition, StreamStateRef, Timestamp } from "./model";
-import { StreamMessage, StreamMessagesResponse } from "./gen/proto/messages/v1alpha1/messages_pb";
+import {
+  StreamMessage,
+  StreamMessagesResponse,
+} from "./gen/proto/messages/v1alpha1/messages_pb";
 
 export class ProximaStreamsClient {
   private client: MessagesServiceClient;
@@ -27,7 +30,7 @@ export class ProximaStreamsClient {
   }
 
   public streamTransitionsAfter(
-    streamStateRef: StreamStateRef,
+    streamStateRef: StreamStateRef
   ): Observable<Transition> {
     let request = new ProximaServiceTypes.StreamMessagesRequest();
     request.setStreamId(streamStateRef.stream);
@@ -35,17 +38,19 @@ export class ProximaStreamsClient {
     if (!streamStateRef.state.isGenesis)
       request = request.setLastMessageId(streamStateRef.state.id);
 
-    console.debug(`creating grpc stream ${streamStateRef.stream}, ${streamStateRef.state.id}`);
+    console.debug(
+      `creating grpc stream ${streamStateRef.stream}, ${streamStateRef.state.id}`
+    );
     const stream = this.client.streamMessages(request, this.authMeta());
 
-    return toObservable<StreamMessagesResponse>(
-      stream
-    ).pipe(mergeMap((x) => x.getMessagesList().flat().map(streamMessageToModel)));
+    return toObservable<StreamMessagesResponse>(stream).pipe(
+      mergeMap((x) => x.getMessagesList().flat().map(streamMessageToModel))
+    );
   }
 
   public async getTransitionsAfter(
     streamStateRef: StreamStateRef,
-    count: number,
+    count: number
   ): Promise<Transition[]> {
     let request = new ProximaServiceTypes.GetNextMessagesRequest()
       .setStreamId(streamStateRef.stream)
@@ -82,14 +87,20 @@ export class ProximaStreamsClient {
 function streamMessageToModel(msg: StreamMessage): Transition {
   return new Transition(
     new State(msg.getId()),
-    new Event(msg.getPayload_asU8(),
+    new Event(
+      msg.getPayload_asU8(),
       timestampToModel(msg.getTimestamp()!),
-      msg.getHeader()!.getUndo())
+      msg.getHeader()!.getUndo()
+    )
   );
 }
 
-function timestampToModel(timestamp: google_protobuf_timestamp_pb.Timestamp): Timestamp {
-  return Timestamp.fromEpochMs(timestamp.getSeconds() * 1e3 + Math.floor(timestamp.getNanos() / 1e3));
+function timestampToModel(
+  timestamp: google_protobuf_timestamp_pb.Timestamp
+): Timestamp {
+  return Timestamp.fromEpochMs(
+    timestamp.getSeconds() * 1e3 + Math.floor(timestamp.getNanos() / 1e3)
+  );
 }
 
 function toObservable<T>(

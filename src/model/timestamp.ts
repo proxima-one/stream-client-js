@@ -1,23 +1,26 @@
-
 export class Timestamp {
   public static readonly max = new Timestamp(Number.MAX_VALUE);
   public static readonly min = new Timestamp(0);
 
-  private constructor(
-    public readonly epochMs: number,
-  ) { }
+  private constructor(public readonly epochMs: number) {}
 
   public static fromEpochSeconds(seconds: number | string): Timestamp {
-    return typeof seconds === "string" ? new Timestamp(Math.round(parseInt(seconds)) * 1000) : new Timestamp(Math.round(seconds) * 1000);
+    return typeof seconds === "string"
+      ? new Timestamp(Math.round(parseInt(seconds)) * 1000)
+      : new Timestamp(Math.round(seconds) * 1000);
   }
 
   public static fromEpochMs(ms: number | string): Timestamp {
-    return typeof ms === "string" ? new Timestamp(Math.round(parseInt(ms))) : new Timestamp(Math.round(ms));
+    return typeof ms === "string"
+      ? new Timestamp(Math.round(parseInt(ms)))
+      : new Timestamp(Math.round(ms));
   }
 
   public static fromString(value: string): Timestamp {
     const number = parseInt(value);
-    return number > 1000000000000 ? this.fromEpochMs(value) : this.fromEpochSeconds(number);
+    return number > 1000000000000
+      ? this.fromEpochMs(value)
+      : this.fromEpochSeconds(number);
   }
 
   public static fromStringOptional(value?: string): Timestamp {
@@ -41,7 +44,7 @@ export class Timestamp {
   }
 
   public addSeconds(seconds: number) {
-    return new Timestamp(this.epochMs + seconds * 1000)
+    return new Timestamp(this.epochMs + seconds * 1000);
   }
 
   public formatUtc() {

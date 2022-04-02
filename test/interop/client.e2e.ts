@@ -11,15 +11,26 @@ describe("StreamClient", () => {
 
   it("should fetch eth block headers", async () => {
     const blockHeaderTransitions = await client.getTransitionsAfter(
-      new StreamStateRef("eth-main-blockheader.streams.proxima.one", State.genesis), 10
+      new StreamStateRef(
+        "eth-main-blockheader.streams.proxima.one",
+        State.genesis
+      ),
+      10
     );
 
-    expect(blockHeaderTransitions.map(x => x.event.payloadAsJson)).toMatchSnapshot();
+    expect(
+      blockHeaderTransitions.map((x) => x.event.payloadAsJson)
+    ).toMatchSnapshot();
   });
 
   it("should stream events", async () => {
     const blockHeadersStream = client
-      .streamTransitionsAfter(new StreamStateRef("eth-main-blockheader.streams.proxima.one", State.genesis))
+      .streamTransitionsAfter(
+        new StreamStateRef(
+          "eth-main-blockheader.streams.proxima.one",
+          State.genesis
+        )
+      )
       .pipe(map((x) => x.event.payloadAsJson));
 
     const firstBlockHeaders = await firstValueFrom(

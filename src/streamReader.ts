@@ -28,7 +28,10 @@ export class StreamReader {
     maxCount: number,
     timeoutMs: number
   ): Promise<Transition[]> {
-    const stateChanges = await this.client.getTransitionsAfter(new StreamStateRef(this.streamId, this.lastState), maxCount);
+    const stateChanges = await this.client.getTransitionsAfter(
+      new StreamStateRef(this.streamId, this.lastState),
+      maxCount
+    );
 
     if (stateChanges.length > 0) {
       this.lastState = stateChanges[stateChanges.length - 1].newState;
@@ -55,7 +58,8 @@ export class StreamReader {
     );
 
     if (firstLiveStateChanges.length > 0) {
-      this.lastState = firstLiveStateChanges[firstLiveStateChanges.length - 1].newState;
+      this.lastState =
+        firstLiveStateChanges[firstLiveStateChanges.length - 1].newState;
       return firstLiveStateChanges;
     }
 
