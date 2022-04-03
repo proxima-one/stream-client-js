@@ -19,7 +19,9 @@ describe("StreamClient", () => {
     );
 
     expect(
-      blockHeaderTransitions.map((x) => x.event.payloadAsJson)
+      blockHeaderTransitions.map((x) =>
+        JSON.parse(x.event.payload.toString("utf8"))
+      )
     ).toMatchSnapshot();
   });
 
@@ -31,7 +33,7 @@ describe("StreamClient", () => {
           State.genesis
         )
       )
-      .pipe(map((x) => x.event.payloadAsJson));
+      .pipe(map((x) => JSON.parse(x.event.payload.toString("utf8"))));
 
     const firstBlockHeaders = await firstValueFrom(
       blockHeadersStream.pipe(take(10), toArray())

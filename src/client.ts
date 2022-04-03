@@ -88,7 +88,7 @@ function streamMessageToModel(msg: StreamMessage): Transition {
   return new Transition(
     new State(msg.getId()),
     new Event(
-      msg.getPayload_asU8(),
+      Buffer.from(msg.getPayload_asU8()),
       timestampToModel(msg.getTimestamp()!),
       msg.getHeader()!.getUndo()
     )
