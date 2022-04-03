@@ -27,7 +27,7 @@
     "gen": "buf push ./proto",
     "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
     "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
-    "pub": "yarn publish"
+    "pub": "lerna publish --no-verify-access"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
