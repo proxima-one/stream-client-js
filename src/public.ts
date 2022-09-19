@@ -7,17 +7,11 @@ export class StreamClient {
     this.registry = options.registry ?? new RemoteStreamRegistry();
   }
 
-  public findOffset(stream: string, params: {height?: number, timestamp: Timestamp}): Offset {
+  public findOffset(streamName: string, params: {height?: number, timestamp: Timestamp}): Offset {
     // 1. get all endpoints having the stream
     // 2. try every to find offset
     // 3. return first found offset
 
-    throw new Error("not implemented");
-  }
-
-  public getStream(name: string): Stream {
-    // 1. return first endpoint having the stream
-    // 2. throw error if stream not found
     throw new Error("not implemented");
   }
 
@@ -90,12 +84,19 @@ export class SingleStreamDbRegistry implements StreamRegistry {
 }
 
 export interface StreamDiscovery {
-  findStreams(filter: StreamFilter): Promise<Stream[]>
+  findStreams(filter: StreamFilter): Promise<Stream[]>;
+  getStream(name: string): Promise<Stream>;
 }
 
 export interface StreamFilter {
   labels?: Record<string, string>;
 }
+
+const filter = {labels: {
+  "smart-contract": "0x0234234234234234",
+  "network": "eth-main",
+    "encoding": "proto"
+}};
 
 export interface Stream {
   name: string;
