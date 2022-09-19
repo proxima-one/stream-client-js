@@ -1,120 +1,98 @@
-import * as grpc from "@grpc/grpc-js";
-import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
-import * as ProximaService from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
-import * as ProximaServiceTypes from "./gen/proto/messages/v1alpha1/messages_pb";
-import { MessagesServiceClient } from "./gen/proto/messages/v1alpha1/messages_grpc_pb";
-import { mergeMap, Observable } from "rxjs";
-import { Event, State, Transition, StreamStateRef, Timestamp } from "./model";
+import { Stream } from "./model/stream";
+import { StreamDBConsumerClient } from "./stream-db/streamDbDatabase";
 import {
-  StreamMessage,
-  StreamMessagesResponse,
-} from "./gen/proto/messages/v1alpha1/messages_pb";
+    StreamInfo,
+    Offset, StateTransition, PausableStream, SimplePauseController
+  } from "@proxima-one/proxima-streams";
+import axios from "axios";
+
 
 export class ProximaStreamsClient {
-  private client: MessagesServiceClient;
+    public endpoint;
+    constructor(endpoint = "https://stream-api.cluster.amur-dev.proxima.one") {
+        this.endpoint = endpoint
+    }
 
-  public constructor(
-    private readonly uri: string,
-    private readonly auth: string = ""
-  ) {
-    const secure = uri.includes(":443");
-    const credentials = secure
-      ? grpc.credentials.createSsl()
-      : grpc.credentials.createInsecure();
-    this.client = new ProximaService.MessagesServiceClient(uri, credentials, {
-      "grpc.keepalive_timeout_ms": 1 * 1000,
-      "grpc.keepalive_time_ms": 10 * 1000,
-      "grpc.keepalive_permit_without_calls": 1,
-      "grpc.max_receive_message_length": 100 * 1024 * 1024,
-    });
-  }
-
-  public streamTransitionsAfter(
-    streamStateRef: StreamStateRef
-  ): Observable<Transition> {
-    let request = new ProximaServiceTypes.StreamMessagesRequest();
-    request.setStreamId(streamStateRef.stream);
-
-    if (!streamStateRef.state.isGenesis)
-      request = request.setLastMessageId(streamStateRef.state.id);
-
-    console.debug(
-      `creating grpc stream ${streamStateRef.stream}, ${streamStateRef.state.id}`
-    );
-    const stream = this.client.streamMessages(request, this.authMeta());
-
-    return toObservable<StreamMessagesResponse>(stream).pipe(
-      mergeMap((x) => x.getMessagesList().flat().map(streamMessageToModel))
-    );
-  }
-
-  public async getTransitionsAfter(
-    streamStateRef: StreamStateRef,
-    count: number
-  ): Promise<Transition[]> {
-    let request = new ProximaServiceTypes.GetNextMessagesRequest()
-      .setStreamId(streamStateRef.stream)
-      .setCount(count);
-
-    if (!streamStateRef.state.isGenesis)
-      request = request.setLastMessageId(streamStateRef.state.id);
-
-    return new Promise<Transition[]>((resolve, reject) => {
-      this.client.getNextMessages(
-        request,
-        this.authMeta(),
-        (err, response: ProximaServiceTypes.GetNextMessagesResponse) => {
-          if (err != null) {
-            console.log(
-              `[execute query] err:\nerr.message: ${err.message}\nerr.stack:\n${err.stack}`
-            );
-            reject(err);
-            return;
-          }
-          resolve(response.getMessagesList().map(streamMessageToModel));
+    async getStreams(): Promise<Stream[]> {
+        try {
+            const streams = await axios.get(this.endpoint + "/streams")
+            return streams.data
+        } catch(e) {
+            console.log(e)
+            return []
         }
-      );
-    });
-  }
+    }
 
-  private authMeta(): grpc.Metadata {
-    const meta = new grpc.Metadata();
-    meta.add("authorization", "Bearer " + this.auth);
-    return meta;
-  }
-}
+    async getStream(name: string, retries = 10): Promise<Stream | undefined> {
+        try {
+            const resp = await axios.get(this.endpoint + "/stream:" + name)
+            if (resp.data) {
+                const stream = resp.data
+                return stream
+            }  else if (retries > 0) {
+                return this.getStream(name, retries - 1)
+            } else {
+                throw new Error("Cannot get stream")
+            }
+        } catch(e) {
+            console.log(e)
+            return undefined
+        }
+    }
 
-function streamMessageToModel(msg: StreamMessage): Transition {
-  return new Transition(
-    new State(msg.getId()),
-    new Event(
-      Buffer.from(msg.getPayload_asU8()),
-      timestampToModel(msg.getTimestamp()!),
-      msg.getHeader()!.getUndo()
-    )
-  );
-}
+    async getStreamConsumer(name: string, retries = 10): Promise<StreamDBConsumerClient> {
+        try {
+            const stream = await this.getStream(name)
+            if (stream && stream.endpoints && stream.endpoints.length > 0) {
+                return new StreamDBConsumerClient(stream.endpoints[0])
+            } else if (retries > 0) {
+                return this.getStreamConsumer(name, retries - 1)
+            } else {
+                throw new Error("Cannot get stream client")
+            }
+        } catch(e) {
+            console.log(e)
+            throw new Error("Cannot get stream client" + e)
+        }
+    }
 
-function timestampToModel(
-  timestamp: google_protobuf_timestamp_pb.Timestamp
-): Timestamp {
-  return Timestamp.fromEpochMs(
-    timestamp.getSeconds() * 1e3 + Math.floor(timestamp.getNanos() / 1e3)
-  );
-}
+    async findOffset(stream: string, height: bigint) {
+        try {
+            const consumer = await this.getStreamConsumer(stream)
+            if (consumer) {
+                return consumer.findOffset(stream, height)
+            }
+            return undefined
+        } catch(e) {
+            console.log(e)
+            return undefined
+        }
+    }
 
-function toObservable<T>(
-  grpcStreamResponse: grpc.ClientReadableStream<T>
-): Observable<T> {
-  return new Observable<T>((observer) => {
-    grpcStreamResponse.on("data", (d) => observer.next(d));
-    grpcStreamResponse.on("error", (err) => observer.error(err));
-    grpcStreamResponse.on("end", () => observer.complete());
-    grpcStreamResponse.on("close", () => observer.error("connection closed"));
+    async getStateTransitions(stream: string, offset: Offset, count: number, direction: "next" | "last") {
+        try {
+            const consumer = await this.getStreamConsumer(stream)
+            if (consumer) {
+                return await consumer.getStateTransitions(stream, offset, count, direction)
+            } 
+            return undefined
+        } catch(e) {
+            console.log(e)
+            return undefined
+        }
+    }
 
-    return () => {
-      console.log("cancelling grpc stream");
-      grpcStreamResponse.cancel();
-    };
-  });
+    async streamStateTransitions(stream: string, offset: Offset): Promise<PausableStream<StateTransition>> {
+        try {
+            const consumer = await this.getStreamConsumer(stream)
+            if (consumer) {
+                return await consumer.streamStateTransitions(stream, offset)
+            } else {
+                throw new Error("Could not get pausable stream")
+            }
+        } catch(e) {
+            console.log(e)
+            throw new Error("Could not get pausable stream" + e)
+        }
+    }
 }
