@@ -1,29 +1,6 @@
-# StreamDB Client JS
-
-## Installation
-
-StreamDB Client requires [Node.js](https://nodejs.org/) v12+ to run.
-
-Install @proximaone/streamdb-client-js package 
-```sh
-yarn add @proximaone/streamdb-client-js
-```
-
-Install the dependencies and devDependencies.
-
-```sh
-yarn install
-```
-
-## Client Usage 
-
-Client for StreamDB uses generated gRPC stubs to provide fast access to data. 
-
-### Sample 
-
-Check out full solution at https://github.com/proxima-one/proxima-samples/tree/master/eth-blockheaders-stream
-
-```typescript 
+//What do we want to do? 
+//lookup streams based on name 
+//check encoding of the stream 
 
 import { StreamClient } from "../src";
 import { map } from "rxjs";
@@ -60,4 +37,3 @@ function decodeJson(binary: Uint8Array | string): any {
   }
 
   main().catch(err => console.error(err));
-```

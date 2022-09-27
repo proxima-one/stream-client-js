@@ -18,6 +18,7 @@
     "format": "prettier --write \"{src,test}/**/*.ts\" \"!src/gen/**\" --double-quote --trailing-comma es5",
     "lint": "eslint . --ext .ts",
     "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js dist/",
+    "format": "prettier --write \"{src,__tests__}/**/*.ts\"",
     "compile": "tsc --build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile && yarn copy-content-files",

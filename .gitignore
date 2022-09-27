@@ -101,7 +101,7 @@ dist
 
 # vuepress build output
 .vuepress/dist
-
+.npmrc
 # Serverless directories
 .serverless/
 

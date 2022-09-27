@@ -1,38 +1,58 @@
-import { Offset as ModelOffset, Timestamp as ModelTimestamp, StateTransition as ModelStateTransition, StreamEvent as ModelStreamEvent, StreamEventsProducerState as ModelProducerState, StreamEvent, StreamOffsets}from "@proxima-one/proxima-streams";
-import { Offset, Timestamp, StateTransition, Event, StreamStateRef } from "../gen/model/v1/model";
-import {strict as assert} from "assert";
-import {Bytes} from "@proxima-one/proxima-core";
+import * as proto_model from "../gen/model/v1/model";
+import { strict as assert } from "assert";
+import { StreamEvent, Offset } from "src/public";
+import { Timestamp } from "src/model/timestamp";
+import { timestamp } from "rxjs";
 
-export function toStateTransitionModel(transition: StateTransition): ModelStateTransition {
-    assert(transition.from && transition.to && transition.event)
-    return new ModelStateTransition(toOffsetModel(transition.from), toOffsetModel(transition.to), toStreamEventModel(transition.event))
+export function stateTransitionProtoToStreamEvent(
+  transition: proto_model.StateTransition
+):StreamEvent {
+  assert(transition.from && transition.to && transition.event);
+
+  return new StreamEvent(
+    protoToOffset(transition.to),
+    transition.event.payload, 
+    transition.event.timestamp ? protoToTimestamp(transition.event.timestamp) : Timestamp.zero, 
+    transition.event.undo
+  )
+  }
+
+  export function timestampToProto(timestamp: Timestamp): proto_model.Timestamp {
+    return proto_model.Timestamp.fromPartial({
+      epochMs: timestamp.epochMs,
+      parts: timestamp.parts.map((part) => {return part.toString()})
+    })
+  }
+
+  export function protoToTimestamp(timestampProto: proto_model.Timestamp): Timestamp {
+    return new Timestamp(
+      timestampProto.epochMs,
+      timestampProto.parts
+    )
+  }
+
+export function protoToOffset(offsetProto: proto_model.Offset): Offset {
+  return new Offset(
+    offsetProto.id,
+    BigInt(offsetProto.height),
+    offsetProto.timestamp
+      ? new Timestamp(
+          offsetProto.timestamp.epochMs,
+          offsetProto.timestamp.parts
+        )
+      : Timestamp.zero
+  );
 }
-
-export function toStreamEventModel(event: Event): ModelStreamEvent {
-    return new ModelStreamEvent(event.timestamp ? new ModelTimestamp(event.timestamp.epochMs, event.timestamp.parts) : ModelTimestamp.zero, 
-        Bytes.fromByteArray(Buffer.from(event.payload.toString())), event.undo)
-}
-
-export function toOffsetModel(offsetProto: Offset): ModelOffset {
-    return new ModelOffset(offsetProto.id, BigInt(offsetProto.height), 
-        offsetProto.timestamp ? new ModelTimestamp(offsetProto.timestamp.epochMs, offsetProto.timestamp.parts) : ModelTimestamp.zero)
-}
-export function toOffsetProto(offsetModel: ModelOffset): Offset {
-    return Offset.fromPartial({id: offsetModel.id, 
-        height: Number(offsetModel.height.toString()), timestamp: 
-            Timestamp.fromPartial({epochMs: offsetModel.timestamp.epochMs, 
-                parts: offsetModel.timestamp.parts.map((part) => {
-                return String(part)
-            })})})
-}
-
-export function toStreamOffsets(stateRefs: StreamStateRef[]): StreamOffsets {
-    const offsets: Record<string, ModelOffset> = {}
-
-    for (const v of stateRefs) {
-        assert(v.offset)
-        offsets[v.streamId] =  toOffsetModel(v.offset)
-    }
-    return new StreamOffsets(offsets)
+export function offsetToProto(offset: Offset): proto_model.Offset {
+  return proto_model.Offset.fromPartial({
+    id: offset.id,
+    height: Number(offset.height.toString()),
+    timestamp: proto_model.Timestamp.fromPartial({
+      epochMs: offset.timestamp.epochMs,
+      parts: offset.timestamp.parts.map(part => {
+        return String(part);
+      }),
+    }),
+  });
 }
 

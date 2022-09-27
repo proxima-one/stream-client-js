@@ -1,17 +1,30 @@
+import { Offset } from "src/gen/model/v1/model";
+
 export type Stream = {
   name: string;
   meta: StreamMetaData;
   stats?: StreamStats;
-  endpoints?: string[];
+  endpoints?: StreamEndpoint[];
 };
 
-export type StreamMetaData = any;
+export type StreamMetaData = {
+  description: string;
+  labels: Record<string, string>
+};
 
-export type StreamEndpointConfig = any;
+export type StreamEndpoint = {
+  uri: string;
+  to: Offset;
+  from: Offset;
+  totalMessages: number;
+};
 
 export type StreamStats = {
-  stats: any;
-  endpoints: string[];
+  id: string;
+  start: Offset;
+  end: Offset;
+  messageCount: number;
+  totalStorageSize: number;
 };
 
 export type Config = {

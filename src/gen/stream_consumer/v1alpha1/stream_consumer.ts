@@ -485,7 +485,7 @@ export const GetStateTransitionsResponse = {
   toJSON(message: GetStateTransitionsResponse): unknown {
     const obj: any = {};
     if (message.stateTransitions) {
-      obj.stateTransitions = message.stateTransitions.map((e) =>
+      obj.stateTransitions = message.stateTransitions.map(e =>
         e ? StateTransition.toJSON(e) : undefined
       );
     } else {
@@ -499,7 +499,7 @@ export const GetStateTransitionsResponse = {
   ): GetStateTransitionsResponse {
     const message = createBaseGetStateTransitionsResponse();
     message.stateTransitions =
-      object.stateTransitions?.map((e) => StateTransition.fromPartial(e)) || [];
+      object.stateTransitions?.map(e => StateTransition.fromPartial(e)) || [];
     return message;
   },
 };
@@ -623,7 +623,7 @@ export const StreamStateTransitionsResponse = {
   toJSON(message: StreamStateTransitionsResponse): unknown {
     const obj: any = {};
     if (message.stateTransition) {
-      obj.stateTransition = message.stateTransition.map((e) =>
+      obj.stateTransition = message.stateTransition.map(e =>
         e ? StateTransition.toJSON(e) : undefined
       );
     } else {
@@ -637,7 +637,7 @@ export const StreamStateTransitionsResponse = {
   ): StreamStateTransitionsResponse {
     const message = createBaseStreamStateTransitionsResponse();
     message.stateTransition =
-      object.stateTransition?.map((e) => StateTransition.fromPartial(e)) || [];
+      object.stateTransition?.map(e => StateTransition.fromPartial(e)) || [];
     return message;
   },
 };
