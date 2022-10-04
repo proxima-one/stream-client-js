@@ -9,7 +9,7 @@ export type Stream = {
 
 export type StreamMetaData = {
   description: string;
-  labels: Record<string, string>
+  labels: Record<string, string>;
 };
 
 export type StreamEndpoint = {

@@ -4,19 +4,20 @@ export class Timestamp {
   public static readonly zero = new Timestamp(0);
 
   public readonly parts: TimestampPart[];
-  public constructor(
-    public readonly epochMs: number,
-    parts?: TimestampPart[],
-  ) {
+  public constructor(public readonly epochMs: number, parts?: TimestampPart[]) {
     this.parts = parts ?? [];
   }
 
   public static fromEpochSeconds(seconds: number | string): Timestamp {
-    return typeof seconds === "string" ? new Timestamp(Math.round(parseInt(seconds)) * 1000) : new Timestamp(Math.round(seconds) * 1000);
+    return typeof seconds === "string"
+      ? new Timestamp(Math.round(parseInt(seconds)) * 1000)
+      : new Timestamp(Math.round(seconds) * 1000);
   }
 
   public static fromEpochMs(ms: number | string): Timestamp {
-    return typeof ms === "string" ? new Timestamp(Math.round(parseInt(ms))) : new Timestamp(Math.round(ms));
+    return typeof ms === "string"
+      ? new Timestamp(Math.round(parseInt(ms)))
+      : new Timestamp(Math.round(ms));
   }
 
   public withParts(parts: TimestampPart[]) {
@@ -44,19 +45,15 @@ export class Timestamp {
   }
 
   public compare(timestamp: Timestamp): number {
-    if (this.epochMs < timestamp.epochMs)
-      return -1;
+    if (this.epochMs < timestamp.epochMs) return -1;
 
-    if (this.epochMs > timestamp.epochMs)
-      return 1;
+    if (this.epochMs > timestamp.epochMs) return 1;
 
     const minLength = Math.min(this.parts.length, timestamp.parts.length);
     for (let i = 0; i < minLength; i++) {
-      if (this.parts[i] > timestamp.parts[i])
-        return 1;
+      if (this.parts[i] > timestamp.parts[i]) return 1;
 
-      if (this.parts[i] < timestamp.parts[i])
-        return -1;
+      if (this.parts[i] < timestamp.parts[i]) return -1;
     }
 
     return 0;
@@ -65,8 +62,7 @@ export class Timestamp {
   public static max(timestamps: Timestamp[]) {
     let res: Timestamp | undefined = undefined;
     for (const timestamp of timestamps) {
-      if (!res || res.lessThan(timestamp))
-        res = timestamp;
+      if (!res || res.lessThan(timestamp)) res = timestamp;
     }
     return res;
   }
@@ -74,8 +70,7 @@ export class Timestamp {
   public static min(timestamps: Timestamp[]) {
     let res: Timestamp | undefined = undefined;
     for (const timestamp of timestamps) {
-      if (!res || res.greaterThan(timestamp))
-        res = timestamp;
+      if (!res || res.greaterThan(timestamp)) res = timestamp;
     }
     return res;
   }
@@ -85,7 +80,7 @@ export class Timestamp {
   }
 }
 
-export type TimestampPart = (number|string);
+export type TimestampPart = number | string;
 // [16234234234234, "eth-main", 78, 10] ERC20 Transfer
 // [16234234234234, "eth-main", 78, 2] Uniswap SWAP
 // [16234234234234, "ex-rate-api"]

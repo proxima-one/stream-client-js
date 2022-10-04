@@ -11,7 +11,7 @@ import {
   offsetToProto,
   protoToOffset,
   stateTransitionProtoToStreamEvent,
-  timestampToProto
+  timestampToProto,
 } from "./converters";
 import { strict as assert } from "assert";
 import * as grpc from "@grpc/grpc-js";
@@ -80,9 +80,10 @@ export class StreamDBConsumerClient {
         }),
         function (error, response) {
           if (error) {
-            return resolve([]);
+            return reject(error);
           }
           if (response && response.stateTransitions) {
+            console.log(response)
             const resp = response.stateTransitions;
             return resolve(
               resp.map(transition => {

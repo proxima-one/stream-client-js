@@ -1,35 +1,37 @@
 import * as proto_model from "../gen/model/v1/model";
 import { strict as assert } from "assert";
-import { StreamEvent, Offset } from "src/public";
-import { Timestamp } from "src/model/timestamp";
-import { timestamp } from "rxjs";
+import { StreamEvent, Offset } from "../public";
+import { Timestamp } from "../model/timestamp";
 
 export function stateTransitionProtoToStreamEvent(
   transition: proto_model.StateTransition
-):StreamEvent {
+): StreamEvent {
   assert(transition.from && transition.to && transition.event);
 
   return new StreamEvent(
     protoToOffset(transition.to),
-    transition.event.payload, 
-    transition.event.timestamp ? protoToTimestamp(transition.event.timestamp) : Timestamp.zero, 
+    transition.event.payload,
+    transition.event.timestamp
+      ? protoToTimestamp(transition.event.timestamp)
+      : Timestamp.zero,
     transition.event.undo
-  )
-  }
+  );
+}
 
-  export function timestampToProto(timestamp: Timestamp): proto_model.Timestamp {
-    return proto_model.Timestamp.fromPartial({
-      epochMs: timestamp.epochMs,
-      parts: timestamp.parts.map((part) => {return part.toString()})
-    })
-  }
+export function timestampToProto(timestamp: Timestamp): proto_model.Timestamp {
+  return proto_model.Timestamp.fromPartial({
+    epochMs: timestamp.epochMs,
+    parts: timestamp.parts.map(part => {
+      return part.toString();
+    }),
+  });
+}
 
-  export function protoToTimestamp(timestampProto: proto_model.Timestamp): Timestamp {
-    return new Timestamp(
-      timestampProto.epochMs,
-      timestampProto.parts
-    )
-  }
+export function protoToTimestamp(
+  timestampProto: proto_model.Timestamp
+): Timestamp {
+  return new Timestamp(timestampProto.epochMs, timestampProto.parts);
+}
 
 export function protoToOffset(offsetProto: proto_model.Offset): Offset {
   return new Offset(
@@ -55,4 +57,3 @@ export function offsetToProto(offset: Offset): proto_model.Offset {
     }),
   });
 }
-

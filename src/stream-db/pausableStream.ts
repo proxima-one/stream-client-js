@@ -5,17 +5,26 @@ export class PausableStream<T> {
   private constructor(
     public readonly controller: StreamController,
     public readonly observable: Observable<T>
-  ) { }
+  ) {}
 
-  public static create<T>(subscribe: (this: Observable<T>, subscriber: Subscriber<T>, pauseState: PauseState) => TeardownLogic)
-    : PausableStream<T>{
+  public static create<T>(
+    subscribe: (
+      this: Observable<T>,
+      subscriber: Subscriber<T>,
+      pauseState: PauseState
+    ) => TeardownLogic
+  ): PausableStream<T> {
     const controller = new SimplePauseController();
 
-    const observable: Observable<T> = new Observable<T>(subscriber => subscribe.call(observable, subscriber, controller));
+    const observable: Observable<T> = new Observable<T>(subscriber =>
+      subscribe.call(observable, subscriber, controller)
+    );
     return new PausableStream<T>(controller, observable);
   }
 
-  public updateObservable<V>(func: (observable: Observable<T>) => Observable<V>): PausableStream<V> {
+  public updateObservable<V>(
+    func: (observable: Observable<T>) => Observable<V>
+  ): PausableStream<V> {
     return new PausableStream<V>(this.controller, func(this.observable));
   }
 
@@ -45,8 +54,7 @@ export class SimplePauseController implements StreamController {
   }
 
   public pause() {
-    if (this.pauseBarrier)
-      return;
+    if (this.pauseBarrier) return;
 
     this.pauseBarrier = barrier();
   }
@@ -57,59 +65,33 @@ export class SimplePauseController implements StreamController {
   }
 
   public async waitUntilResumed(): Promise<void> {
-    if (!this.pauseBarrier)
-      return;
+    if (!this.pauseBarrier) return;
 
     await this.pauseBarrier.lock;
   }
 }
-//
-// export class StreamControllerComposition implements StreamController {
-//   public constructor(
-//     private readonly underlying: ReadonlyArray<StreamController>
-//   ) { }
-//
-//   public get isPaused(): boolean {
-//     return _.every(this.underlying, x => x.isPaused);
-//   }
-//
-//   public pause(): void {
-//     for (let ctrl of this.underlying)
-//       ctrl.pause();
-//   }
-//
-//   public resume(): void {
-//     for (let ctrl of this.underlying)
-//       ctrl.resume();
-//   }
-//
-//   public async waitUntilResumed(): Promise<void> {
-//     await Promise.all(this.underlying.map(x => x.waitUntilResumed()));
-//   }
-// }
+
 export function barrier(resourcesCount: number = 1): Barrier {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   let unlock = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  let unlockWithError = (err:any) => {};
+  let unlockWithError = (err: any) => {};
 
   let resourcesLeft = resourcesCount;
   const lock = new Promise<void>((resolve, reject) => {
     unlock = () => {
       resourcesLeft--;
-      if (resourcesLeft <= 0)
-        resolve();
+      if (resourcesLeft <= 0) resolve();
     };
-    unlockWithError = (err:any) => reject(err);
+    unlockWithError = (err: any) => reject(err);
 
-    if (resourcesLeft === 0)
-      resolve();
+    if (resourcesLeft === 0) resolve();
   });
-  return { lock, unlock, unlockWithError }
+  return { lock, unlock, unlockWithError };
 }
 
 export type Barrier = {
   lock: Promise<void>;
   unlock: () => void;
-  unlockWithError: (err:any) => void
-}
+  unlockWithError: (err: any) => void;
+};
