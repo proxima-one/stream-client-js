@@ -19,9 +19,7 @@ yarn install
 
 Client for StreamDB uses generated gRPC stubs to provide fast access to data. 
 
-### Sample 
-
-Check out full solution at https://github.com/proxima-one/proxima-samples/tree/master/eth-blockheaders-stream
+### Installation 
 
 ```typescript 
 
@@ -40,7 +38,7 @@ async function main() {
     const offset = await client.findOffset(name, {height: Number(height)})
     console.log(`Consuming stream ${name} from offset ${offset}`)
     const pausable = await client.streamEvents(name, offset) 
-    pausable.pipe(map(event => {
+    pausable.observable.pipe(map(event => {
             const e =  {
               offset: event.offset,
               payload: decodeJson(event.payload),

@@ -5,7 +5,7 @@ import axios from "axios";
 import { strict as assert } from "assert";
 import { PausableStream } from "./stream-db/pausableStream";
 import { offsetToProto } from "./stream-db/converters";
-
+import { times } from "lodash";
 
 export class StreamClient {
   private readonly registry: StreamRegistry;
@@ -24,11 +24,9 @@ export class StreamClient {
     // 2. try every to find offset
     // 3. return first found offset
 
-    const endpoints = await this.registry.findStreamEndpoints(
-      stream,
-      new Offset("Unknown", BigInt(params.height), params.timestamp ?? Timestamp.zero)
-    );
-    console.log(endpoints)
+    const endpoints = await this.registry.findStreamEndpoints(stream, {
+      from: params,
+    });
     for (const endpoint of endpoints) {
       const client = this.getStreamConsumerClient(endpoint.uri);
       const offset = await client.findOffset(
@@ -50,7 +48,7 @@ export class StreamClient {
     try {
       return await this.registry.getStream(name);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw new Error("Stream not found" + e);
     }
   }
@@ -66,7 +64,7 @@ export class StreamClient {
     // 3. note, it's worth keeping clients to every streamdb endpoint cached (as well as grpc connections to them)
     const endpoints: StreamEndpoint[] = await this.registry.findStreamEndpoints(
       streamName,
-      offset
+      { from: { height: Number(offset.height), timestamp: offset.timestamp } }
     );
     for (const endpoint of endpoints) {
       const client = this.getStreamConsumerClient(endpoint.uri);
@@ -82,37 +80,41 @@ export class StreamClient {
   }
 
   private getStreamConsumerClient(endpoint: string) {
-    if (endpoint in this.clientCache) {
-      return this.clientCache[endpoint];
+    if (!(endpoint in this.clientCache)) {
+      const client = new StreamDBConsumerClient(endpoint);
+      this.clientCache[endpoint] = client;
     }
-    const client = new StreamDBConsumerClient(endpoint);
-    return client;
+    return this.clientCache[endpoint];
   }
 
+  // 1. find endpoint having the offset
+  // 2. stream events from it
   public async streamEvents(
     streamName: string,
     offset: Offset = Offset.zero
   ): Promise<PausableStream<StreamEvent>> {
-    // 1. find endpoint having the offset
-    // 2. stream events from it
     try {
-      const endpoints: StreamEndpoint[] = await this.registry.findStreamEndpoints(
-        streamName,
-        offset
-      );
+      const endpoints: StreamEndpoint[] =
+        await this.registry.findStreamEndpoints(streamName, {
+          from: { height: Number(offset.height), timestamp: offset.timestamp },
+        });
       for (const endpoint of endpoints) {
         const client = this.getStreamConsumerClient(endpoint.uri);
-        return await client.streamStateTransitions(streamName, offset);
+        const eventStream = await client.streamStateTransitions(
+          streamName,
+          offset
+        );
+        return eventStream;
       }
       throw new Error("Cannot stream data");
-    } catch(e) {
+    } catch (e) {
       throw new Error("Cannot stream data");
     }
   }
 }
 
 export class Offset {
-  public static readonly zero = new Offset("", BigInt(0), Timestamp.zero);
+  public static readonly zero = new Offset("ZERO", BigInt(1), Timestamp.zero);
 
   public constructor(
     public readonly id: string,
@@ -182,28 +184,75 @@ export const DefaultRegistryClientOptions: StreamRegistryOptions = {
 export interface StreamRegistry {
   findStreamEndpoints(
     streamName: string,
-    offset: Offset
+    offset: FindOffsetFilter
   ): Promise<StreamEndpoint[]>;
   findStreams(streamFilter: StreamFilter): Promise<Stream[]>;
   getStream(streamName: string): Promise<Stream>;
 }
 
 export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
+  private _streams: SimpleCache<Stream>;
+
   public constructor(
     private readonly endpoint: string = "https://stream-api.cluster.amur-dev.proxima.one",
     public readonly options: StreamRegistryOptions = DefaultRegistryClientOptions
-  ) {}
+  ) {
+    this._streams = new SimpleCache<Stream>();
+  }
 
   public async findStreamEndpoints(
     streamName: string,
-    from: Offset,
-    to?: Offset
+    filter: FindOffsetFilter
   ): Promise<StreamEndpoint[]> {
+    if (this._streams.contains(streamName)) {
+      const stream = this._streams.get(streamName);
+      if (stream.endpoints == undefined) {
+        return [];
+      }
+      const endpoints = stream.endpoints?.filter(endpoint => {
+        if (
+          endpoint.from.height > filter.from.height ||
+          (filter.from.timestamp &&
+            endpoint.from.timestamp.epochMs > filter.from.timestamp?.epochMs)
+        ) {
+          return false;
+        }
+        if (
+          (filter.to && filter.to.height > filter.from.height) ||
+          (filter.to &&
+            endpoint.to &&
+            filter.to.timestamp &&
+            endpoint.to.timestamp.epochMs > filter.to.timestamp?.epochMs)
+        ) {
+          return false;
+        }
+        return true;
+      });
+      return endpoints;
+    }
+    //stream cache
+    //filter
+    const fromOffset = offsetToProto(
+      new Offset(
+        "from",
+        BigInt(filter.from.height),
+        filter.from.timestamp || Timestamp.zero
+      )
+    );
+    const toOffset = filter.to
+      ? offsetToProto(
+          new Offset(
+            "to",
+            BigInt(filter.from.height),
+            filter.to.timestamp || Timestamp.zero
+          )
+        )
+      : undefined;
     const resp = await axios.post(
       this.endpoint + "/streams/" + streamName + "/endpoints",
       {
-        from: offsetToProto(from),
-        to: to ? offsetToProto(to) : undefined,
+        from: fromOffset,
+        to: toOffset,
       }
     );
     return resp.data.items;
@@ -226,6 +275,10 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
   }
 
   public async getStream(streamName: string): Promise<Stream> {
+    if (this._streams.contains(streamName)) {
+      return this._streams.get(streamName);
+    }
+    //seek cache
     try {
       const resp = await execAndReturnWithRetry<any>(
         async () => {
@@ -236,6 +289,7 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
       );
       if (resp.data) {
         const stream = resp.data;
+        this._streams.set(streamName, stream);
         return stream;
       } else {
         throw new Error("Cannot get stream");
@@ -252,7 +306,7 @@ export class SingleStreamDbRegistry implements StreamRegistry {
 
   public async findStreamEndpoints(
     streamName: string,
-    offset: Offset
+    filter: FindOffsetFilter
   ): Promise<StreamEndpoint[]> {
     // assume single streamdb has all requested streams
     return [
@@ -305,4 +359,53 @@ export interface StreamEndpoint {
   from: Offset;
   to?: Offset;
   messageCount?: number;
+}
+
+export type FindOffsetFilter = {
+  from: {
+    height: number;
+    timestamp?: Timestamp;
+  };
+  to?: {
+    height: number;
+    timestamp?: Timestamp;
+  };
+};
+
+class SimpleCache<T> {
+  private _objects: Record<string, T>;
+  private _durations: Record<string, number>;
+
+  constructor(public readonly ttl = 300000) {
+    this._objects = {};
+    this._durations = {};
+  }
+
+  public set(key: string, value: T) {
+    this._objects[key] = value;
+    this._durations[key] = Date.now() + this.ttl;
+  }
+
+  public contains(key: string): boolean {
+    this._removeIfOverdue(key);
+    return key in this._objects;
+  }
+
+  private _removeIfOverdue(key: string): void {
+    if (key in this._durations && this._durations[key] <= Date.now()) {
+      this.remove(key);
+    }
+  }
+
+  public remove(key: string) {
+    delete this._objects[key];
+    delete this._durations[key];
+  }
+
+  public get(key: string): T {
+    if (this.contains(key)) {
+      return this._objects[key];
+    }
+    throw new Error("Cache does not contain value at key: " + key);
+  }
 }

@@ -1,4 +1,4 @@
-import { Offset } from "src/gen/model/v1/model";
+import { Offset, Timestamp } from "src/gen/model/v1/model";
 
 export type Stream = {
   name: string;
@@ -27,7 +27,7 @@ export type StreamStats = {
   totalStorageSize: number;
 };
 
-export type Config = {
+export type StreamClientConfig = {
   metadataEndpoint: string;
   statsEndpoint: string;
   statsInterval: number;

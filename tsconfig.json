@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./build",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "jsx": "react",
@@ -29,6 +29,6 @@
   ],
   "include": [
     "src/**/*",
-    "src/**/*.json"
-  ]
+    "src/**/*.json", 
+    "samples" ]
 }

@@ -48,7 +48,9 @@ export function protoToOffset(offsetProto: proto_model.Offset): Offset {
 export function offsetToProto(offset: Offset): proto_model.Offset {
   return proto_model.Offset.fromPartial({
     id: offset.id,
-    height: Number(offset.height.toString()),
+    height: Number(offset.height.toString())
+      ? Number(offset.height.toString())
+      : 1, //TODO: Fix issue with 0
     timestamp: proto_model.Timestamp.fromPartial({
       epochMs: offset.timestamp.epochMs,
       parts: offset.timestamp.parts.map(part => {

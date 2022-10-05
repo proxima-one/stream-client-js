@@ -13,10 +13,7 @@ import {
   stateTransitionProtoToStreamEvent,
   timestampToProto,
 } from "./converters";
-import { strict as assert } from "assert";
 import * as grpc from "@grpc/grpc-js";
-import { watchFile } from "fs-extra";
-import { isNull } from "lodash";
 import { sleep } from "@proxima-one/proxima-utils";
 import { StreamEvent, Offset } from "src/public";
 import { Timestamp } from "src/model/timestamp";
@@ -48,7 +45,7 @@ export class StreamDBConsumerClient {
       this.consumer.findOffset(
         FindOffsetRequest.fromPartial({
           streamId: stream,
-          height: Number(height),
+          height: Number(height) ? Number(height) : 1, //TODO: Fix issue with offsets not being able to get 0 value (start)
           timestamp: timestamp ? timestampToProto(timestamp) : undefined,
         }),
         function (error, response) {
@@ -83,7 +80,6 @@ export class StreamDBConsumerClient {
             return reject(error);
           }
           if (response && response.stateTransitions) {
-            console.log(response)
             const resp = response.stateTransitions;
             return resolve(
               resp.map(transition => {
@@ -105,8 +101,7 @@ export class StreamDBConsumerClient {
       StreamStateTransitionsRequest.fromPartial({
         streamId: stream,
         offset: offsetToProto(offset),
-      }),
-      undefined
+      })
     );
 
     return PausableStream.create<StreamEvent>((observer, pauseState) => {

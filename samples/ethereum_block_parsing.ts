@@ -2,8 +2,10 @@
 //lookup streams based on name 
 //check encoding of the stream 
 
-import { StreamClient } from "../src";
+import {strict as assert} from 'assert'
+import { StreamClient } from "../src/index";
 import { map } from "rxjs";
+import { sleep } from '@proxima-one/proxima-utils';
 
 
 async function main() {
@@ -12,22 +14,23 @@ async function main() {
     const name = "eth-main-blockheader0.new-runtime"
     console.log(`Getting stream: ${name}...`)
     const stream =  await client.getStream(name)
-    console.log(`Success! Fetched stream ${stream.toString()}`)
-    const height = stream.stats.start.height
-    const offset = await client.findOffset(name, {height: Number(height)})
+    console.log(`Success! Fetched stream ${stream}`)
+    assert(stream.stats)
+    const height = stream.stats.start.height || 0
+    const offset = await client.findOffset(name, {height: Number(height) + 1})
     console.log(`Consuming stream ${name} from offset ${offset}`)
     const pausable = await client.streamEvents(name, offset) 
-    pausable.pipe(map(event => {
+    pausable.observable.subscribe(async (event) => {
             const e =  {
               offset: event.offset,
               payload: decodeJson(event.payload),
               undo: event.undo,
               timestamp: event.timestamp,
             };
-            console.log(e)
             return e
-    }))
+    })
 }
+
 function decodeJson(binary: Uint8Array | string): any {
     const buffer =
       typeof binary == "string"

@@ -2,8 +2,8 @@
   "name": "@proximaone/stream-client-js",
   "version": "0.7.0",
   "description": "Client to Proxima StreamDB",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
     "dist",
     "lib"
@@ -17,18 +17,16 @@
     "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo && rimraf coverage",
     "format": "prettier --write \"{src,test}/**/*.ts\" \"!src/gen/**\" --double-quote --trailing-comma es5",
     "lint": "eslint . --ext .ts",
-    "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js dist/",
+    "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js build/",
     "format": "prettier --write \"{src,__tests__}/**/*.ts\"",
     "compile": "tsc --build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
-    "build": "yarn compile && yarn copy-content-files",
+    "build": "yarn compile && yarn codegen && yarn copy-content-files",
+    "codegen": "buf generate",
     "dev": "ts-node ./src/dev.ts",
-    "prepublishOnly": "yarn build",
-    "push": "buf push ./proto",
-    "gen": "buf push ./proto",
     "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
-    "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
-    "pub": "lerna publish --no-verify-access"
+    "pub": "lerna publish --no-verify-access",
+    "samples:eth_block_parsing": "ts-node ./samples/ethereum_block_parsing.ts" 
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",

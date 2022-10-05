@@ -52,6 +52,11 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Misc
+test/interop/__snapshots__
+src/gen
+
+
 # TypeScript v1 declaration files
 typings/
 
@@ -91,7 +96,8 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+build 
+./src/gen
 
 # Gatsby files
 .cache/
