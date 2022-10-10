@@ -15,9 +15,10 @@ import {
 } from "./converters";
 import * as grpc from "@grpc/grpc-js";
 import { sleep } from "@proxima-one/proxima-utils";
-import { StreamEvent, Offset } from "src/public";
-import { Timestamp } from "src/model/timestamp";
+import { StreamEvent } from "../public";
+
 import { PausableStream } from "./pausableStream";
+import { Offset } from "../model/offset";
 
 export class StreamDBConsumerClient {
   //client (consumer)
@@ -36,34 +37,9 @@ export class StreamDBConsumerClient {
     });
   }
 
-  public findOffset(
-    stream: string,
-    height: bigint,
-    timestamp?: Timestamp
-  ): Promise<Offset | undefined> {
-    return new Promise((resolve, reject) => {
-      this.consumer.findOffset(
-        FindOffsetRequest.fromPartial({
-          streamId: stream,
-          height: Number(height) ? Number(height) : 1, //TODO: Fix issue with offsets not being able to get 0 value (start)
-          timestamp: timestamp ? timestampToProto(timestamp) : undefined,
-        }),
-        function (error, response) {
-          if (error) return reject(error);
-          if (response == undefined) return resolve(undefined);
-          const resp = response.offset;
-          if (resp !== undefined) {
-            return resolve(protoToOffset(resp));
-          }
-          return resolve(undefined);
-        }
-      );
-    });
-  }
-
   public getStateTransitions(
     stream: string,
-    offset: Offset,
+    offsetStr: string,
     count: number,
     direction: "next" | "last"
   ): Promise<StreamEvent[]> {
@@ -71,7 +47,7 @@ export class StreamDBConsumerClient {
       this.consumer.getStateTransitions(
         GetStateTransitionsRequest.fromPartial({
           streamId: stream,
-          offset: offsetToProto(offset),
+          offset: offsetToProto(Offset.parse(offsetStr)),
           count: count,
           direction: direction == "next" ? Direction.NEXT : Direction.LAST,
         }),
@@ -95,12 +71,12 @@ export class StreamDBConsumerClient {
 
   public async streamStateTransitions(
     stream: string,
-    offset: Offset
+    offsetStr: string
   ): Promise<PausableStream<StreamEvent>> {
     const grpcStreamResponse = this.consumer.streamStateTransitions(
       StreamStateTransitionsRequest.fromPartial({
         streamId: stream,
-        offset: offsetToProto(offset),
+        offset: offsetToProto(Offset.parse(offsetStr)),
       })
     );
 

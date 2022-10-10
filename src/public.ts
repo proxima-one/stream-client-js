@@ -5,7 +5,7 @@ import axios from "axios";
 import { strict as assert } from "assert";
 import { PausableStream } from "./stream-db/pausableStream";
 import { offsetToProto } from "./stream-db/converters";
-import { times } from "lodash";
+import { Offset } from "./model/offset";
 
 export class StreamClient {
   private readonly registry: StreamRegistry;
@@ -18,27 +18,11 @@ export class StreamClient {
 
   public async findOffset(
     stream: string,
-    params: { height: number; timestamp?: Timestamp }
-  ): Promise<Offset | undefined> {
-    // 1. get all endpoints having the stream
-    // 2. try every to find offset
-    // 3. return first found offset
-
-    const endpoints = await this.registry.findStreamEndpoints(stream, {
-      from: params,
-    });
-    for (const endpoint of endpoints) {
-      const client = this.getStreamConsumerClient(endpoint.uri);
-      const offset = await client.findOffset(
-        stream,
-        BigInt(params.height || 0),
-        params.timestamp
-      );
-      if (offset !== undefined) {
-        return offset;
-      }
-      return undefined;
-    }
+    height?: number,
+    timestamp?: number
+  ): Promise<string | undefined> {
+    const offset = await this.registry.findOffset(stream, height, timestamp);
+    return offset;
   }
 
   //return stream matching the name
@@ -55,7 +39,7 @@ export class StreamClient {
 
   public async fetchEvents(
     streamName: string,
-    offset: Offset,
+    offset: string,
     count: number,
     direction: "next" | "last"
   ): Promise<StreamEvent[]> {
@@ -64,7 +48,7 @@ export class StreamClient {
     // 3. note, it's worth keeping clients to every streamdb endpoint cached (as well as grpc connections to them)
     const endpoints: StreamEndpoint[] = await this.registry.findStreamEndpoints(
       streamName,
-      { from: { height: Number(offset.height), timestamp: offset.timestamp } }
+      offset
     );
     for (const endpoint of endpoints) {
       const client = this.getStreamConsumerClient(endpoint.uri);
@@ -91,13 +75,11 @@ export class StreamClient {
   // 2. stream events from it
   public async streamEvents(
     streamName: string,
-    offset: Offset = Offset.zero
+    offset: string
   ): Promise<PausableStream<StreamEvent>> {
     try {
       const endpoints: StreamEndpoint[] =
-        await this.registry.findStreamEndpoints(streamName, {
-          from: { height: Number(offset.height), timestamp: offset.timestamp },
-        });
+        await this.registry.findStreamEndpoints(streamName, offset);
       for (const endpoint of endpoints) {
         const client = this.getStreamConsumerClient(endpoint.uri);
         const eventStream = await client.streamStateTransitions(
@@ -113,51 +95,11 @@ export class StreamClient {
   }
 }
 
-export class Offset {
-  public static readonly zero = new Offset("ZERO", BigInt(1), Timestamp.zero);
-
-  public constructor(
-    public readonly id: string,
-    public readonly height: bigint,
-    public readonly timestamp: Timestamp
-  ) {
-    assert(id.length > 0 || height == BigInt(0));
-  }
-
-  public equals(offset: Offset): boolean {
-    return this.id == offset.id;
-  }
-
-  public sameHeight(offset: Offset): boolean {
-    return this.height == offset.height;
-  }
-
-  public canSucceed(offset: Offset): boolean {
-    return (
-      this.height - BigInt(1) == offset.height &&
-      this.timestamp.greaterThan(offset.timestamp)
-    );
-  }
-
-  public canPrecede(offset: Offset): boolean {
-    if (this.equals(Offset.zero)) return true;
-
-    return (
-      this.height + BigInt(1) == offset.height &&
-      this.timestamp.lessThan(offset.timestamp)
-    );
-  }
-
-  public dump(): string {
-    return `${this.height}-${this.id}@(${this.timestamp.dump()})`;
-  }
-}
-
 export class StreamEvent {
   public constructor(
-    public readonly offset: Offset,
+    public readonly offset: Offset | string,
     public readonly payload: Uint8Array,
-    public readonly timestamp: Timestamp,
+    public readonly timestamp: number,
     public readonly undo: boolean
   ) {}
 }
@@ -184,10 +126,15 @@ export const DefaultRegistryClientOptions: StreamRegistryOptions = {
 export interface StreamRegistry {
   findStreamEndpoints(
     streamName: string,
-    offset: FindOffsetFilter
+    offset: string
   ): Promise<StreamEndpoint[]>;
   findStreams(streamFilter: StreamFilter): Promise<Stream[]>;
   getStream(streamName: string): Promise<Stream>;
+  findOffset(
+    stream: string,
+    height?: number,
+    timestamp?: number
+  ): Promise<string | undefined>;
 }
 
 export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
@@ -202,60 +149,28 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
 
   public async findStreamEndpoints(
     streamName: string,
-    filter: FindOffsetFilter
+    offset: string
   ): Promise<StreamEndpoint[]> {
-    if (this._streams.contains(streamName)) {
-      const stream = this._streams.get(streamName);
-      if (stream.endpoints == undefined) {
-        return [];
-      }
-      const endpoints = stream.endpoints?.filter(endpoint => {
-        if (
-          endpoint.from.height > filter.from.height ||
-          (filter.from.timestamp &&
-            endpoint.from.timestamp.epochMs > filter.from.timestamp?.epochMs)
-        ) {
-          return false;
-        }
-        if (
-          (filter.to && filter.to.height > filter.from.height) ||
-          (filter.to &&
-            endpoint.to &&
-            filter.to.timestamp &&
-            endpoint.to.timestamp.epochMs > filter.to.timestamp?.epochMs)
-        ) {
-          return false;
-        }
-        return true;
-      });
-      return endpoints;
+    try {
+      const resp = await execAndReturnWithRetry<any>(
+        async () => {
+          return await axios.get(
+            this.endpoint +
+              "/streams/" +
+              streamName +
+              "offsets/" +
+              offset +
+              "/endpoints"
+          );
+        },
+        this.options.retryPolicy.retryCount,
+        this.options.retryPolicy.waitInMs
+      );
+      return resp.data.items;
+    } catch (e) {
+      console.log(e);
+      return [];
     }
-    //stream cache
-    //filter
-    const fromOffset = offsetToProto(
-      new Offset(
-        "from",
-        BigInt(filter.from.height),
-        filter.from.timestamp || Timestamp.zero
-      )
-    );
-    const toOffset = filter.to
-      ? offsetToProto(
-          new Offset(
-            "to",
-            BigInt(filter.from.height),
-            filter.to.timestamp || Timestamp.zero
-          )
-        )
-      : undefined;
-    const resp = await axios.post(
-      this.endpoint + "/streams/" + streamName + "/endpoints",
-      {
-        from: fromOffset,
-        to: toOffset,
-      }
-    );
-    return resp.data.items;
   }
 
   public async findStreams(streamFilter: StreamFilter): Promise<Stream[]> {
@@ -299,6 +214,40 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
       throw new Error("Cannot get stream");
     }
   }
+
+  public async findOffset(
+    stream: string,
+    height?: number,
+    timestamp?: number
+  ): Promise<string | undefined> {
+    try {
+      const queryString = height
+        ? "height=" + height.toString()
+        : "timestamp=" + timestamp?.toString();
+      const resp = await execAndReturnWithRetry<any>(
+        async () => {
+          return await axios.get(
+            this.endpoint +
+              "/streams/" +
+              stream +
+              "/offsets/find?" +
+              queryString
+          );
+        },
+        this.options.retryPolicy.retryCount,
+        this.options.retryPolicy.waitInMs
+      );
+
+      if (resp.data) {
+        return resp.data.id;
+      } else {
+        return undefined;
+      }
+    } catch (e) {
+      console.log(e);
+      return undefined;
+    }
+  }
 }
 
 export class SingleStreamDbRegistry implements StreamRegistry {
@@ -306,19 +255,26 @@ export class SingleStreamDbRegistry implements StreamRegistry {
 
   public async findStreamEndpoints(
     streamName: string,
-    filter: FindOffsetFilter
+    filter: string
   ): Promise<StreamEndpoint[]> {
     // assume single streamdb has all requested streams
     return [
       {
         uri: this.streamDbUrl,
-        from: Offset.zero,
+        from: Offset.zero.dump(),
       },
     ];
   }
 
   public async findStreams(streamFilter: StreamFilter): Promise<Stream[]> {
     return [];
+  }
+  public async findOffset(
+    stream: string,
+    height?: number,
+    timestamp?: number
+  ): Promise<string | undefined> {
+    throw new Error("Not implemented");
   }
 
   public async getStream(name: string): Promise<Stream> {
@@ -348,16 +304,16 @@ export interface StreamMetadata {
 
 export type StreamStats = {
   id: string;
-  start: Offset;
-  end: Offset;
+  start?: string;
+  end?: string;
   messageCount: number;
   totalStorageSize: number;
 };
 
 export interface StreamEndpoint {
   uri: string;
-  from: Offset;
-  to?: Offset;
+  from?: string;
+  to?: string;
   messageCount?: number;
 }
 
