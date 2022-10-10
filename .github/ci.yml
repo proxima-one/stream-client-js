@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - master
+      - v1
 
   pull_request:
     types: [opened, synchronize]
     branches:
       - master
+      - v1
 
 jobs:
   node-lib-lerna:
