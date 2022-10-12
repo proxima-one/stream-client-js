@@ -6,6 +6,7 @@ import { strict as assert } from "assert";
 import { PausableStream } from "./stream-db/pausableStream";
 import { offsetToProto } from "./stream-db/converters";
 import { Offset } from "./model/offset";
+import { Stream, StreamEndpoint, StreamStats } from "./model";
 
 export class StreamClient {
   private readonly registry: StreamRegistry;
@@ -31,6 +32,17 @@ export class StreamClient {
     // 2. throw error if stream not found
     try {
       return await this.registry.getStream(name);
+    } catch (e) {
+      console.log(e);
+      throw new Error("Stream not found" + e);
+    }
+  }
+
+  public async getStreams(): Promise<Stream[]> {
+    // 1. return first endpoint having the stream
+    // 2. throw error if stream not found
+    try {
+      return await this.registry.getStreams();
     } catch (e) {
       console.log(e);
       throw new Error("Stream not found" + e);
@@ -128,7 +140,7 @@ export interface StreamRegistry {
     streamName: string,
     offset: string
   ): Promise<StreamEndpoint[]>;
-  findStreams(streamFilter: StreamFilter): Promise<Stream[]>;
+  getStreams(): Promise<Stream[]>;
   getStream(streamName: string): Promise<Stream>;
   findOffset(
     stream: string,
@@ -147,6 +159,22 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
     this._streams = new SimpleCache<Stream>();
   }
 
+  public async findStreams(filter: StreamFilter): Promise<Stream[]> {
+    try {
+      const streams = await execAndReturnWithRetry<any>(
+        async () => {
+          return await axios.post(this.endpoint + "/streams/search", filter);
+        },
+        this.options.retryPolicy.retryCount,
+        this.options.retryPolicy.waitInMs
+      );
+      return streams.data.items;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  }
+
   public async findStreamEndpoints(
     streamName: string,
     offset: string
@@ -158,7 +186,7 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
             this.endpoint +
               "/streams/" +
               streamName +
-              "offsets/" +
+              "/offsets/" +
               offset +
               "/endpoints"
           );
@@ -173,16 +201,16 @@ export class RemoteStreamRegistry implements StreamRegistry, StreamDiscovery {
     }
   }
 
-  public async findStreams(streamFilter: StreamFilter): Promise<Stream[]> {
+  public async getStreams(): Promise<Stream[]> {
     try {
       const streams = await execAndReturnWithRetry<any>(
         async () => {
-          return await axios.post(this.endpoint + "/streams", streamFilter);
+          return await axios.get(this.endpoint + "/streams");
         },
         this.options.retryPolicy.retryCount,
         this.options.retryPolicy.waitInMs
       );
-      return streams.data;
+      return streams.data.items;
     } catch (e) {
       console.log(e);
       return [];
@@ -262,11 +290,13 @@ export class SingleStreamDbRegistry implements StreamRegistry {
       {
         uri: this.streamDbUrl,
         from: Offset.zero.dump(),
+        to: Offset.zero.dump(),
+        totalMessages: 0
       },
     ];
   }
 
-  public async findStreams(streamFilter: StreamFilter): Promise<Stream[]> {
+  public async getStreams(): Promise<Stream[]> {
     return [];
   }
   public async findOffset(
@@ -290,32 +320,32 @@ export interface StreamFilter {
   labels?: Record<string, string>;
 }
 
-export interface Stream {
-  name: string;
-  metadata: StreamMetadata;
-  stats?: StreamStats;
-  endpoints?: StreamEndpoint[];
-}
+// export interface Stream {
+//   name: string;
+//   metadata: StreamMetadata;
+//   stats?: StreamStats;
+//   endpoints?: StreamEndpoint[];
+// }
 
-export interface StreamMetadata {
-  description: string;
-  labels: Record<string, string>;
-}
+// export interface StreamMetadata {
+//   description: string;
+//   labels: Record<string, string>;
+// }
 
-export type StreamStats = {
-  id: string;
-  start?: string;
-  end?: string;
-  messageCount: number;
-  totalStorageSize: number;
-};
+// export type StreamStats = {
+//   id: string;
+//   start?: string;
+//   end?: string;
+//   messageCount: number;
+//   totalStorageSize: number;
+// };
 
-export interface StreamEndpoint {
-  uri: string;
-  from?: string;
-  to?: string;
-  messageCount?: number;
-}
+// export interface StreamEndpoint {
+//   uri: string;
+//   from?: string;
+//   to?: string;
+//   messageCount?: number;
+// }
 
 export type FindOffsetFilter = {
   from: {

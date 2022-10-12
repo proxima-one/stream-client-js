@@ -2,7 +2,7 @@ import { Offset, Timestamp } from "src/gen/model/v1/model";
 
 export type Stream = {
   name: string;
-  meta: StreamMetaData;
+  metadata: StreamMetaData;
   stats?: StreamStats;
   endpoints?: StreamEndpoint[];
 };
@@ -14,15 +14,15 @@ export type StreamMetaData = {
 
 export type StreamEndpoint = {
   uri: string;
-  to: Offset;
-  from: Offset;
+  to: string;
+  from: string;
   totalMessages: number;
 };
 
 export type StreamStats = {
   id: string;
-  start: Offset;
-  end: Offset;
+  start: string;
+  end: string;
   messageCount: number;
   totalStorageSize: number;
 };

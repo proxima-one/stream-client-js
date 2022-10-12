@@ -2,8 +2,8 @@ import { RemoteStreamRegistry, StreamClient} from "../../src";
 import { strict as assert } from "assert";
 import { Offset } from "../../src/model/offset";
 
-//const testEndpoint = "https://stream-api.cluster.amur-dev.proxima.one";
-const testEndpoint = "http://localhost:7000"
+const testEndpoint = "https://stream-api.cluster.amur-dev.proxima.one";
+//const testEndpoint = "http://localhost:7000"
 jest.setTimeout(30000)
 
 describe("StreamClient", () => {
@@ -20,6 +20,20 @@ describe("StreamClient", () => {
     expect(stream.metadata).toMatchSnapshot();
     expect(stream.endpoints).toBeDefined()
     expect(stream.name).toMatch(name)
+  });
+
+  it("should be able to get single stream, sttreams, and select stream", async () => {
+    jest.setTimeout(30000)
+    const name = "eth-main-blockheader0.new-runtime"
+    const stream =  await client.getStream(name)
+    console.log(stream)
+    expect(stream.metadata).toMatchSnapshot();
+    expect(stream.endpoints).toBeDefined()
+    expect(stream.name).toMatch(name)
+
+    const allStreams = await client.getStreams()
+    expect(allStreams).toMatchSnapshot();
+    expect(allStreams.length).toBeGreaterThan(0);
   });
 
   it("should get an offset for a specified height and/or timestamp", async () => {
@@ -57,9 +71,9 @@ describe("StreamClient", () => {
     const height = 1
     const newOffset = await client.findOffset(name, Number(height))
     assert(newOffset)
-    const newEvents = (await (await client.streamEvents(name, newOffset))).observable.subscribe((e) => {
-      expect(e).toMatchSnapshot()
-      return e
-    })
+    // const newEvents = (await (await client.streamEvents(name, newOffset))).observable.subscribe((e) => {
+    //   expect(e).toMatchSnapshot()
+    //   return e
+    // })
   });
 });
