@@ -1,6 +1,6 @@
 {
   "name": "@proximaone/stream-client-js-v1",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "description": "Client to Proxima StreamDB",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -14,7 +14,7 @@
   "author": "proxima.one",
   "license": "MIT",
   "scripts": {
-    "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo && rimraf coverage",
+    "clean": "rimraf -rf build && rimraf tsconfig.tsbuildinfo && rimraf coverage",
     "format": "prettier --write \"{src,__tests__}/**/*.ts\"",
     "lint": "eslint . --ext .ts",
     "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js build/",
