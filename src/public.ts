@@ -1,12 +1,14 @@
 import { StreamDBConsumerClient } from "./stream-db/streamDbDatabase";
-import { Timestamp } from "./model/timestamp";
-import { execAndReturnWithRetry } from "./utils";
+import { execAndReturnWithRetry, SimpleCache } from "./utils";
 import axios from "axios";
-import { strict as assert } from "assert";
 import { PausableStream } from "./stream-db/pausableStream";
-import { offsetToProto } from "./stream-db/converters";
-import { Offset } from "./model/offset";
-import { Stream, StreamEndpoint, StreamStats } from "./model";
+import {
+  Stream,
+  StreamEndpoint,
+  Offset,
+  Timestamp,
+  StreamEvent,
+} from "./model";
 
 export class StreamClient {
   private readonly registry: StreamRegistry;
@@ -105,15 +107,6 @@ export class StreamClient {
       throw new Error("Cannot stream data");
     }
   }
-}
-
-export class StreamEvent {
-  public constructor(
-    public readonly offset: Offset | string,
-    public readonly payload: Uint8Array,
-    public readonly timestamp: number,
-    public readonly undo: boolean
-  ) {}
 }
 
 export interface StreamClientOptions {
@@ -291,7 +284,7 @@ export class SingleStreamDbRegistry implements StreamRegistry {
         uri: this.streamDbUrl,
         from: Offset.zero.dump(),
         to: Offset.zero.dump(),
-        totalMessages: 0
+        totalMessages: 0,
       },
     ];
   }
@@ -320,33 +313,6 @@ export interface StreamFilter {
   labels?: Record<string, string>;
 }
 
-// export interface Stream {
-//   name: string;
-//   metadata: StreamMetadata;
-//   stats?: StreamStats;
-//   endpoints?: StreamEndpoint[];
-// }
-
-// export interface StreamMetadata {
-//   description: string;
-//   labels: Record<string, string>;
-// }
-
-// export type StreamStats = {
-//   id: string;
-//   start?: string;
-//   end?: string;
-//   messageCount: number;
-//   totalStorageSize: number;
-// };
-
-// export interface StreamEndpoint {
-//   uri: string;
-//   from?: string;
-//   to?: string;
-//   messageCount?: number;
-// }
-
 export type FindOffsetFilter = {
   from: {
     height: number;
@@ -357,41 +323,3 @@ export type FindOffsetFilter = {
     timestamp?: Timestamp;
   };
 };
-
-class SimpleCache<T> {
-  private _objects: Record<string, T>;
-  private _durations: Record<string, number>;
-
-  constructor(public readonly ttl = 300000) {
-    this._objects = {};
-    this._durations = {};
-  }
-
-  public set(key: string, value: T) {
-    this._objects[key] = value;
-    this._durations[key] = Date.now() + this.ttl;
-  }
-
-  public contains(key: string): boolean {
-    this._removeIfOverdue(key);
-    return key in this._objects;
-  }
-
-  private _removeIfOverdue(key: string): void {
-    if (key in this._durations && this._durations[key] <= Date.now()) {
-      this.remove(key);
-    }
-  }
-
-  public remove(key: string) {
-    delete this._objects[key];
-    delete this._durations[key];
-  }
-
-  public get(key: string): T {
-    if (this.contains(key)) {
-      return this._objects[key];
-    }
-    throw new Error("Cache does not contain value at key: " + key);
-  }
-}

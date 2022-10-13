@@ -9,7 +9,7 @@ export class Offset {
     public readonly height: bigint,
     public readonly timestamp: Timestamp
   ) {
-    //assert(id.length > 0 || height == BigInt(0));
+    assert(id.length > 0 || height == BigInt(0));
   }
 
   public equals(offset: Offset): boolean {

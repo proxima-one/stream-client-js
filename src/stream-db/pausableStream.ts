@@ -1,5 +1,4 @@
-import { Observable, Subscriber, TeardownLogic } from "rxjs";
-import { OperatorFunction } from "rxjs";
+import { Observable, Subscriber, TeardownLogic, OperatorFunction } from "rxjs";
 
 export class PausableStream<T> {
   private constructor(

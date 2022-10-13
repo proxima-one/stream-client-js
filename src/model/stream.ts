@@ -1,4 +1,4 @@
-import { Offset, Timestamp } from "src/gen/model/v1/model";
+import { Offset } from ".";
 
 export type Stream = {
   name: string;
@@ -38,3 +38,12 @@ export type StreamClientConfig = {
     db: string;
   };
 };
+
+export class StreamEvent {
+  public constructor(
+    public readonly offset: Offset | string,
+    public readonly payload: Uint8Array,
+    public readonly timestamp: number,
+    public readonly undo: boolean
+  ) {}
+}

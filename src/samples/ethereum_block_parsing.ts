@@ -1,11 +1,5 @@
-//What do we want to do?
-//lookup streams based on name
-//check encoding of the stream
-
 import { strict as assert } from "assert";
 import { StreamClient } from "../index";
-import { map } from "rxjs";
-import { sleep } from "@proxima-one/proxima-utils";
 
 async function main() {
   console.log(`Running stream client for a simple example...`);

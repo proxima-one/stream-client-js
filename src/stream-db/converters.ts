@@ -1,8 +1,6 @@
 import * as proto_model from "../gen/model/v1/model";
 import { strict as assert } from "assert";
-import { StreamEvent } from "../public";
-import { Timestamp } from "../model/timestamp";
-import { Offset } from "../model/offset";
+import { StreamEvent, Timestamp, Offset } from "../model";
 
 export function stateTransitionProtoToStreamEvent(
   transition: proto_model.StateTransition

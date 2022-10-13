@@ -1,30 +1,20 @@
 import {
   StreamConsumerServiceClient,
-  FindStreamRequest,
-  FindStreamResponse,
-  FindOffsetRequest,
   GetStateTransitionsRequest,
   Direction,
   StreamStateTransitionsRequest,
 } from "../gen/stream_consumer/v1alpha1/stream_consumer";
-import {
-  offsetToProto,
-  protoToOffset,
-  stateTransitionProtoToStreamEvent,
-  timestampToProto,
-} from "./converters";
+import { offsetToProto, stateTransitionProtoToStreamEvent } from "./converters";
 import * as grpc from "@grpc/grpc-js";
 import { sleep } from "@proxima-one/proxima-utils";
-import { StreamEvent } from "../public";
+import { StreamEvent, Offset } from "../model";
 
 import { PausableStream } from "./pausableStream";
-import { Offset } from "../model/offset";
 
 export class StreamDBConsumerClient {
-  //client (consumer)
   private consumer: StreamConsumerServiceClient;
 
-  constructor(uri: string, auth = "") {
+  constructor(uri: string) {
     const secure = uri.includes(":443");
     const credentials = secure
       ? grpc.credentials.createSsl()

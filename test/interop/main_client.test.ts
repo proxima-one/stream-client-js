@@ -1,6 +1,5 @@
 import { RemoteStreamRegistry, StreamClient} from "../../src";
 import { strict as assert } from "assert";
-import { Offset } from "../../src/model/offset";
 
 const testEndpoint = "https://stream-api.cluster.amur-dev.proxima.one";
 //const testEndpoint = "http://localhost:7000"
@@ -54,7 +53,6 @@ describe("StreamClient", () => {
     const newOffset = await client.findOffset(name, Number(height) + 1000)
     console.log(newOffset)
     assert(stream.stats.end)
-    const endHeight = Offset.parse(stream.stats.end).height
     await client.findOffset(name, Number(height) + 20)
     assert(newOffset)
     const newEvents = await client.fetchEvents(name, newOffset, 100, "next")
