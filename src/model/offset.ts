@@ -37,7 +37,11 @@ export class Offset {
   }
 
   public dump(): string {
-    return `${this.height}-${this.id}@(${this.timestamp.dump()})`;
+    return `${this.height}-${this.id}@(${this.timestamp.toString()})`;
+  }
+
+  public toString(): string {
+    return this.dump()
   }
 
   public static parse(raw: string) {
@@ -47,18 +51,7 @@ export class Offset {
     const height = BigInt(offsetParts[0]);
     const id = secondParts[0];
 
-    const timestampParts = secondParts[1]
-      .replace("(", "")
-      .replace(")", "")
-      .split(",");
-    const epochMs = Number(timestampParts[0]);
-    const timestamp = new Timestamp(epochMs);
-    if (timestampParts.length > 1) {
-      const parts = timestampParts.slice(1).map(part => {
-        return String(part);
-      });
-      timestamp.withParts(parts);
-    }
+    const timestamp = Timestamp.parse(secondParts[1])
     return new Offset(id, height, timestamp);
   }
 }

@@ -53,7 +53,7 @@ node_modules/
 jspm_packages/
 
 # Misc
-test/interop/__snapshots__
+# test/interop/__snapshots__
 src/gen
 
 

@@ -76,9 +76,30 @@ export class Timestamp {
   }
 
   public dump(): string {
-    return `${this.epochMs},${this.parts.join(",")}`;
+    const partsStr = this.parts.length > 0 ? "," + this.parts.join(",") : ""
+    return `${this.epochMs},${partsStr}`;
   }
-}
+
+  public toString(): string {
+    return this.dump()
+  }
+
+  public static parse(rawTimestamp: string): Timestamp {
+      const timestampParts = rawTimestamp
+      .replace("(", "")
+      .replace(")", "")
+      .split(",");
+    const epochMs = Number(timestampParts[0]);
+    const timestamp = new Timestamp(epochMs);
+    if (timestampParts.length > 1) {
+      const parts = timestampParts.slice(1).map(part => {
+        return String(part);
+      });
+      timestamp.withParts(parts);
+    }
+    return timestamp
+    }
+ }
 
 export type TimestampPart = number | string;
 // [16234234234234, "eth-main", 78, 10] ERC20 Transfer

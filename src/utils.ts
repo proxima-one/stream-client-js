@@ -84,3 +84,11 @@ export class SimpleCache<T> {
     throw new Error("Cache does not contain value at key: " + key);
   }
 }
+
+export function decodeJson(binary: Uint8Array | string): any {
+  const buffer =
+    typeof binary == "string"
+      ? Buffer.from(binary, "base64")
+      : Buffer.from(binary);
+  return JSON.parse(buffer.toString("utf8"));
+}

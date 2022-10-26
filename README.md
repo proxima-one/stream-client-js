@@ -19,21 +19,10 @@ yarn install
 
 Client for StreamDB uses generated gRPC stubs to provide fast access to data. 
 
-### Installation 
-
 ```typescript 
-
-import { StreamClient } from "../src";
-import { map } from "rxjs";
-
-
-async function main() {
-    console.log(`Running stream client for a simple example...`)
     const client = new StreamClient({});
     const name = "eth-main-blockheader0.new-runtime"
-    console.log(`Getting stream: ${name}...`)
     const stream =  await client.getStream(name)
-    console.log(`Success! Fetched stream ${stream.toString()}`)
     const height = stream.stats.start.height
     const offset = await client.findOffset(name, {height: Number(height)})
     console.log(`Consuming stream ${name} from offset ${offset}`)
@@ -49,13 +38,6 @@ async function main() {
             return e
     }))
 }
-function decodeJson(binary: Uint8Array | string): any {
-    const buffer =
-      typeof binary == "string"
-        ? Buffer.from(binary, "base64")
-        : Buffer.from(binary);
-    return JSON.parse(buffer.toString("utf8"));
-  }
 
   main().catch(err => console.error(err));
 ```

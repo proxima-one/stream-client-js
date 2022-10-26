@@ -1,5 +1,5 @@
 import { strict as assert } from "assert";
-import { StreamClient } from "../index";
+import { StreamClient, decodeJson } from "../src/index";
 
 async function main() {
   console.log(`Running stream client for a simple example...`);
@@ -23,14 +23,6 @@ async function main() {
     };
     return e;
   });
-}
-
-function decodeJson(binary: Uint8Array | string): any {
-  const buffer =
-    typeof binary == "string"
-      ? Buffer.from(binary, "base64")
-      : Buffer.from(binary);
-  return JSON.parse(buffer.toString("utf8"));
 }
 
 main().catch(err => console.error(err));

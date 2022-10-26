@@ -69,9 +69,5 @@ describe("StreamClient", () => {
     const height = 1
     const newOffset = await client.findOffset(name, Number(height))
     assert(newOffset)
-    // const newEvents = (await (await client.streamEvents(name, newOffset))).observable.subscribe((e) => {
-    //   expect(e).toMatchSnapshot()
-    //   return e
-    // })
   });
 });
