@@ -1,4 +1,4 @@
-import { RemoteStreamRegistry, StreamClient} from "../../src";
+import { StreamRegistryClient, StreamClient} from "../../src";
 import { strict as assert } from "assert";
 
 const testEndpoint = "https://stream-api.cluster.amur-dev.proxima.one";
@@ -8,7 +8,7 @@ jest.setTimeout(30000)
 describe("StreamClient", () => {
   let client: StreamClient;
   beforeEach(() => {
-    client = new StreamClient({registry: new RemoteStreamRegistry(testEndpoint)});
+    client = new StreamClient({registry: new StreamRegistryClient(testEndpoint)});
   });
 
   it("should get stream endpoints and data", async () => {

@@ -1,23 +1,34 @@
-import { StreamDBConsumerClient } from "./streamdb/consumerClient";
 import { Offset } from "./model";
+import { ProximaStreamClient, SingleStreamDbRegistry } from "./client";
+import { BufferedStreamReader } from "./lib/reader";
+import { sleep } from "./utils";
 
 async function main() {
-  const streamDb = new StreamDBConsumerClient("localhost:50051");
-  //const streamDb = new StreamDBConsumerClient("core-us-proxy.core-us-proxy.buh.apps.proxima.one:443");
-  const stream = await streamDb.streamStateTransitions(
-    "proxima.eth-main.blocks.1_0",
-    ""
-  );
-
-  stream.observable.subscribe(stateTransition => {
-    console.log(`Offset: ${stateTransition.offset.toString()}`);
+  const client = new ProximaStreamClient({
+    registry: new SingleStreamDbRegistry("localhost:50051"),
   });
 
-  let action = 0;
-  setInterval(() => {
-    if (action++ % 2 == 0) stream.controller.pause();
-    else stream.controller.resume();
-  }, 3000);
+  let currentOffset = Offset.zero;
+  for (let i = 0; i < 100; i++) {
+    const events = await client.fetchEvents("proxima.eth-main.blocks.1_0", currentOffset, 100, "next");
+    currentOffset = events[events.length - 1].offset;
+
+    console.log(`fetched till ${currentOffset.toString()}`);
+  }
+
+  console.log("starting the stream");
+
+  const stream = await client.streamEvents("proxima.eth-main.blocks.1_0", Offset.zero);
+  const reader = BufferedStreamReader.fromStream(stream, 10000);
+
+  while (true) {
+    const batch = await reader.read(100);
+    if (!batch)
+      break;
+
+    console.log(`doing some stuff with a batch of ${batch.length}. ${batch[batch.length-1].offset.toString()}`);
+    await sleep(100);
+  }
 }
 
 main();

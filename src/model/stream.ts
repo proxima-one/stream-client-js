@@ -1,44 +1,5 @@
 import { Offset } from ".";
 
-export type Stream = {
-  name: string;
-  metadata: StreamMetaData;
-  stats?: StreamStats;
-  endpoints?: StreamEndpoint[];
-};
-
-export type StreamMetaData = {
-  description: string;
-  labels: Record<string, string>;
-};
-
-export type StreamEndpoint = {
-  uri: string;
-  to: string;
-  from: string;
-  totalMessages: number;
-};
-
-export type StreamStats = {
-  id: string;
-  start: string;
-  end: string;
-  messageCount: number;
-  totalStorageSize: number;
-};
-
-export type StreamClientConfig = {
-  metadataEndpoint: string;
-  statsEndpoint: string;
-  statsInterval: number;
-  metaInterval: number;
-  mongoConfig: {
-    address: string;
-    credentials: any;
-    db: string;
-  };
-};
-
 export class StreamEvent {
   public constructor(
     public readonly offset: Offset,
@@ -46,4 +7,55 @@ export class StreamEvent {
     public readonly timestamp: number,
     public readonly undo: boolean
   ) {}
+
+  public typed<T>(deserializer: (x: Uint8Array) => T) {
+    return new TypedStreamEvent(
+      this.offset,
+      deserializer(this.payload),
+      this.timestamp,
+      this.undo,
+    );
+  }
+}
+
+export class TypedStreamEvent<T> {
+  public constructor(
+    public readonly offset: Offset,
+    public readonly payload: T,
+    public readonly timestamp: number,
+    public readonly undo: boolean
+  ) {}
+}
+
+export class Stream {
+  public constructor(
+    public readonly name: string,
+    public readonly metadata: StreamMetadata,
+    public readonly endpoints: Readonly<Record<string, StreamEndpoint>>
+  ) {
+  }
+}
+
+export class StreamStats {
+  public constructor(
+    public readonly start: Offset,
+    public readonly end: Offset | undefined,
+    public readonly length: number | undefined,
+    public readonly storageSize: number | undefined,
+  ) {
+  }
+}
+
+export class StreamEndpoint {
+  public constructor(
+    public readonly uri: string,
+    public readonly stats: StreamStats,
+  ) { }
+}
+
+export class StreamMetadata {
+  public constructor(
+    public readonly description: string,
+    public readonly labels: Readonly<Record<string, string>>,
+  ) { }
 }

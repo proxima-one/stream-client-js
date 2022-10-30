@@ -12,9 +12,10 @@ export class PausableStream<T> {
       this: Observable<T>,
       subscriber: Subscriber<T>,
       pauseState: PauseState
-    ) => TeardownLogic
+    ) => TeardownLogic,
+    existingController?: StreamController
   ): PausableStream<T> {
-    const controller = new SimplePauseController();
+    const controller = existingController ?? new SimplePauseController();
 
     const observable: Observable<T> = new Observable<T>(subscriber =>
       subscribe.call(observable, subscriber, controller)

@@ -8,7 +8,7 @@ import { offsetToProto, stateTransitionProtoToStreamEvent } from "./converters";
 import * as grpc from "@grpc/grpc-js";
 import { StreamEvent, Offset } from "../model";
 
-import { PausableStream } from "../lib/pausableStream";
+import { PausableStream, StreamController } from "../lib/pausableStream";
 
 export class StreamDBConsumerClient {
   private consumer: StreamConsumerServiceClient;
@@ -26,9 +26,9 @@ export class StreamDBConsumerClient {
     });
   }
 
-  public getStateTransitions(
+  public getEvents(
     stream: string,
-    offsetStr: string,
+    offset: Offset,
     count: number,
     direction: "next" | "last"
   ): Promise<StreamEvent[]> {
@@ -36,7 +36,7 @@ export class StreamDBConsumerClient {
       this.consumer.getStateTransitions(
         GetStateTransitionsRequest.fromPartial({
           streamId: stream,
-          offset: offsetToProto(Offset.parse(offsetStr)),
+          offset: offsetToProto(offset),
           count: count,
           direction: direction == "next" ? Direction.NEXT : Direction.LAST,
         }),
@@ -58,15 +58,16 @@ export class StreamDBConsumerClient {
     });
   }
 
-  public async streamStateTransitions(
+  public getEventsStream(
     stream: string,
-    offsetStr: string
-  ): Promise<PausableStream<StreamEvent>> {
-    console.log(offsetToProto(Offset.parse(offsetStr)));
+    offset: Offset,
+    controller?: StreamController
+  ): PausableStream<StreamEvent> {
+    console.log(offsetToProto(offset));
     const grpcStreamResponse = this.consumer.streamStateTransitions(
       StreamStateTransitionsRequest.fromPartial({
         streamId: stream,
-        offset: offsetToProto(Offset.parse(offsetStr)),
+        offset: offsetToProto(offset),
       })
     );
 
@@ -93,6 +94,6 @@ export class StreamDBConsumerClient {
         grpcStreamResponse.cancel();
         clearInterval(checkInterval);
       };
-    });
+    }, controller);
   }
 }
