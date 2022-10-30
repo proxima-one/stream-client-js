@@ -2,7 +2,7 @@ import { strict as assert } from "assert";
 import { Timestamp } from "./timestamp";
 
 export class Offset {
-  public static readonly zero = new Offset("ZERO", BigInt(1), Timestamp.zero);
+  public static readonly zero = new Offset("", BigInt(0), Timestamp.zero);
 
   public constructor(
     public readonly id: string,
@@ -36,22 +36,20 @@ export class Offset {
     );
   }
 
-  public dump(): string {
+  public toString(): string {
     return `${this.height}-${this.id}@(${this.timestamp.toString()})`;
   }
 
-  public toString(): string {
-    return this.dump()
-  }
-
   public static parse(raw: string) {
+    if (!raw) return Offset.zero;
+
     const offsetParts = raw.split("-");
     const secondParts = offsetParts[1].split("@");
 
     const height = BigInt(offsetParts[0]);
     const id = secondParts[0];
 
-    const timestamp = Timestamp.parse(secondParts[1])
+    const timestamp = Timestamp.parse(secondParts[1]);
     return new Offset(id, height, timestamp);
   }
 }

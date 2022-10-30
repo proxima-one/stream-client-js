@@ -1,5 +1,3 @@
-// TODO: use streamId as last part
-
 export class Timestamp {
   public static readonly zero = new Timestamp(0);
 
@@ -76,16 +74,16 @@ export class Timestamp {
   }
 
   public dump(): string {
-    const partsStr = this.parts.length > 0 ? "," + this.parts.join(",") : ""
+    const partsStr = this.parts.length > 0 ? "," + this.parts.join(",") : "";
     return `${this.epochMs},${partsStr}`;
   }
 
   public toString(): string {
-    return this.dump()
+    return this.dump();
   }
 
   public static parse(rawTimestamp: string): Timestamp {
-      const timestampParts = rawTimestamp
+    const timestampParts = rawTimestamp
       .replace("(", "")
       .replace(")", "")
       .split(",");
@@ -97,12 +95,8 @@ export class Timestamp {
       });
       timestamp.withParts(parts);
     }
-    return timestamp
-    }
- }
+    return timestamp;
+  }
+}
 
 export type TimestampPart = number | string;
-// [16234234234234, "eth-main", 78, 10] ERC20 Transfer
-// [16234234234234, "eth-main", 78, 2] Uniswap SWAP
-// [16234234234234, "ex-rate-api"]
-// [16234234234234, "bsc-main", 78, 2] Panckeaswap SWAP

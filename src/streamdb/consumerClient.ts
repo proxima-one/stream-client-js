@@ -6,10 +6,9 @@ import {
 } from "../gen/stream_consumer/v1alpha1/stream_consumer";
 import { offsetToProto, stateTransitionProtoToStreamEvent } from "./converters";
 import * as grpc from "@grpc/grpc-js";
-import { sleep } from "@proxima-one/proxima-utils";
 import { StreamEvent, Offset } from "../model";
 
-import { PausableStream } from "./pausableStream";
+import { PausableStream } from "../lib/pausableStream";
 
 export class StreamDBConsumerClient {
   private consumer: StreamConsumerServiceClient;
@@ -20,8 +19,8 @@ export class StreamDBConsumerClient {
       ? grpc.credentials.createSsl()
       : grpc.credentials.createInsecure();
     this.consumer = new StreamConsumerServiceClient(uri, credentials, {
-      "grpc.keepalive_timeout_ms": 1 * 1000,
-      "grpc.keepalive_time_ms": 10 * 1000,
+      "grpc.keepalive_timeout_ms": 10 * 1000,
+      "grpc.keepalive_time_ms": 100 * 1000,
       "grpc.keepalive_permit_without_calls": 1,
       "grpc.max_receive_message_length": 100 * 1024 * 1024,
     });
@@ -41,7 +40,7 @@ export class StreamDBConsumerClient {
           count: count,
           direction: direction == "next" ? Direction.NEXT : Direction.LAST,
         }),
-        function (error, response) {
+        (error, response) => {
           if (error) {
             return reject(error);
           }
@@ -63,6 +62,7 @@ export class StreamDBConsumerClient {
     stream: string,
     offsetStr: string
   ): Promise<PausableStream<StreamEvent>> {
+    console.log(offsetToProto(Offset.parse(offsetStr)));
     const grpcStreamResponse = this.consumer.streamStateTransitions(
       StreamStateTransitionsRequest.fromPartial({
         streamId: stream,
@@ -79,18 +79,20 @@ export class StreamDBConsumerClient {
       grpcStreamResponse.on("error", err => observer.error(err));
       grpcStreamResponse.on("end", () => observer.complete());
       grpcStreamResponse.on("close", () => observer.error("connection closed"));
-      const checkLoop = async () => {
-        while (true) {
-          if (pauseState.isPaused) {
-            grpcStreamResponse.pause();
-            await pauseState.waitUntilResumed();
-            grpcStreamResponse.resume();
-          } else {
-            await sleep(100);
-          }
+
+      const checkInterval = setInterval(() => {
+        if (pauseState.isPaused && !grpcStreamResponse.isPaused()) {
+          grpcStreamResponse.pause();
+        } else if (!pauseState.isPaused && grpcStreamResponse.isPaused()) {
+          grpcStreamResponse.resume();
         }
+      }, 100);
+
+      // unsubscribe logic
+      return () => {
+        grpcStreamResponse.cancel();
+        clearInterval(checkInterval);
       };
-      checkLoop();
     });
   }
 }

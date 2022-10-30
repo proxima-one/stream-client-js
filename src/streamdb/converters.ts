@@ -8,7 +8,7 @@ export function stateTransitionProtoToStreamEvent(
   assert(transition.from && transition.to && transition.event);
 
   return new StreamEvent(
-    protoToOffset(transition.to).dump(),
+    protoToOffset(transition.to),
     transition.event.payload,
     transition.event.timestamp
       ? protoToTimestamp(transition.event.timestamp)
@@ -42,9 +42,7 @@ export function protoToOffset(offsetProto: proto_model.Offset): Offset {
 export function offsetToProto(offset: Offset): proto_model.Offset {
   return proto_model.Offset.fromPartial({
     id: offset.id,
-    height: Number(offset.height.toString())
-      ? Number(offset.height.toString())
-      : 1,
+    height: Number(offset.height.toString()),
     timestamp: proto_model.Timestamp.fromPartial({
       epochMs: offset.timestamp.epochMs,
       parts: [],

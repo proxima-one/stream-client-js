@@ -41,7 +41,7 @@ export type StreamClientConfig = {
 
 export class StreamEvent {
   public constructor(
-    public readonly offset: Offset | string,
+    public readonly offset: Offset,
     public readonly payload: Uint8Array,
     public readonly timestamp: number,
     public readonly undo: boolean

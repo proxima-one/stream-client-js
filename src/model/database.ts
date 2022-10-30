@@ -1,5 +1,5 @@
 import { StreamEvent, Offset } from ".";
-import { PausableStream } from "src/stream-db/pausableStream";
+import { PausableStream } from "../lib/pausableStream";
 
 export interface StreamConsumer {
   findStream(id: string): Promise<StreamInfo | undefined>;

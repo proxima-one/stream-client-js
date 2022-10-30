@@ -1,4 +1,4 @@
-import { StreamDBConsumerClient } from "./stream-db/streamDbDatabase";
+import { StreamDBConsumerClient } from "./stream-db/consumerClient";
 import { execAndReturnWithRetry, SimpleCache } from "./utils";
 import axios from "axios";
 import { PausableStream } from "./stream-db/pausableStream";

@@ -19,8 +19,8 @@
     "lint": "eslint . --ext .ts",
     "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js build/",
     "compile": "tsc --build",
-    "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
-    "build": "yarn compile && yarn codegen && yarn copy-content-files",
+    "prebuild": "yarn clean && yarn format && yarn lint && yarn codegen && echo Using TypeScript && tsc --version",
+    "build": "yarn compile && yarn copy-content-files",
     "codegen": "buf generate",
     "dev": "ts-node ./src/dev.ts",
     "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
@@ -54,8 +54,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.6.1",
-    "@proxima-one/proxima-streams": "^0.2.5",
-    "@proxima-one/proxima-utils": "^0.1.6",
+    "axios": "^1.1.3",
     "google-protobuf": "^3.20.0",
     "rxjs": "^7.5.5"
   }
