@@ -1,6 +1,6 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "1.7.3",
+  "version": "1.0.0",
   "description": "Client to Proxima StreamDB",
   "main": "build/index.js",
   "types": "build/index.d.ts",
