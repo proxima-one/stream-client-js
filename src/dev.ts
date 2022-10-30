@@ -4,9 +4,13 @@ import { BufferedStreamReader } from "./lib/reader";
 import { sleep } from "./utils";
 
 async function main() {
-  const client = new ProximaStreamClient({
-    registry: new SingleStreamDbRegistry("localhost:50051"),
-  });
+  // connect to local StreamDB
+  // const client = new ProximaStreamClient({
+  //   registry: new SingleStreamDbRegistry("localhost:50051"),
+  // });
+
+  // by default connect through Stream Registry
+  const client = new ProximaStreamClient();
 
   let currentOffset = Offset.zero;
   for (let i = 0; i < 100; i++) {

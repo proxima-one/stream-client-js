@@ -12,7 +12,7 @@ export interface StreamRegistryOptions {
 }
 
 const DefaultRegistryClientOptions: StreamRegistryOptions = {
-  endpoint: "https://stream-registry.buh.apps.proxima.one",
+  endpoint: "https://streams.api.proxima.one",
   retryPolicy: {
     retryCount: 10,
     waitInMs: 300,
