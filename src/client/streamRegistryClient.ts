@@ -32,17 +32,17 @@ export class StreamRegistryClient implements StreamRegistry {
 
   public async getStreamEndpoints(stream: string, offset: Offset): Promise<StreamEndpoint[]> {
     const resp = await this.call(async () => await this.client.get(`/streams/${stream}/offsets/${offset.toString()}/endpoints`));
-    return parseStreamEndpoints(resp.data);
+    return parseStreamEndpoints(JSON.parse(resp.data));
   }
 
   public async findStreams(filter: StreamFilter): Promise<Stream[]> {
     const resp = await this.call(async () => await this.client.post(`/streams/search`, filter));
-    return parseStreams(resp.data);
+    return parseStreams(JSON.parse(resp.data));
   }
 
   public async getStreams(): Promise<Stream[]> {
     const resp = await this.call(async () => await this.client.get(`/streams`));
-    return parseStreams(resp.data);
+    return parseStreams(JSON.parse(resp.data));
   }
 
   public async findStream(stream: string): Promise<Stream | undefined> {
@@ -51,7 +51,7 @@ export class StreamRegistryClient implements StreamRegistry {
     if (resp.status == 404)
       return undefined;
 
-    return parseStream(resp.data);
+    return parseStream(JSON.parse(resp.data));
   }
 
   public async findOffset(
@@ -66,7 +66,7 @@ export class StreamRegistryClient implements StreamRegistry {
       },
     }));
 
-    return Offset.fromString(Parsing.parseStringProperty(resp.data, "id"));
+    return Offset.fromString(Parsing.parseStringProperty(JSON.parse(resp.data), "id"));
   }
 
   private async call<T>(func: () => Promise<T>) {

@@ -1,5 +1,5 @@
 import { Offset } from "./model";
-import { ProximaStreamClient, SingleStreamDbRegistry } from "./client";
+import { ProximaStreamClient, SingleStreamDbRegistry, StreamRegistryClient } from "./client";
 import { BufferedStreamReader } from "./lib/reader";
 import { sleep } from "./utils";
 
@@ -12,8 +12,12 @@ async function main() {
   // by default connect through Stream Registry
   const client = new ProximaStreamClient();
 
+  const streamRegistry = new StreamRegistryClient();
+  const allStreams = await streamRegistry.getStreams();
+  console.log(allStreams.map(x => x.name));
+
   let currentOffset = Offset.zero;
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 10; i++) {
     const events = await client.fetchEvents("proxima.eth-main.blocks.1_0", currentOffset, 100, "next");
     currentOffset = events[events.length - 1].offset;
 
@@ -31,6 +35,7 @@ async function main() {
       break;
 
     console.log(`doing some stuff with a batch of ${batch.length}. ${batch[batch.length-1].offset.toString()}`);
+    // simulate processing
     await sleep(100);
   }
 }
