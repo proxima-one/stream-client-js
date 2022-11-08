@@ -54,7 +54,6 @@ jspm_packages/
 
 # Misc
 # test/interop/__snapshots__
-src/gen
 
 
 # TypeScript v1 declaration files
@@ -96,8 +95,7 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-build 
-./src/gen
+build
 
 # Gatsby files
 .cache/
