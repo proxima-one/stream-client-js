@@ -13,7 +13,7 @@ export class StreamEvent {
       this.offset,
       deserializer(this.payload),
       this.timestamp,
-      this.undo,
+      this.undo
     );
   }
 }
@@ -32,8 +32,7 @@ export class Stream {
     public readonly name: string,
     public readonly metadata: StreamMetadata,
     public readonly endpoints: Readonly<Record<string, StreamEndpoint>>
-  ) {
-  }
+  ) {}
 }
 
 export class StreamStats {
@@ -41,21 +40,20 @@ export class StreamStats {
     public readonly start: Offset,
     public readonly end: Offset | undefined,
     public readonly length: number | undefined,
-    public readonly storageSize: number | undefined,
-  ) {
-  }
+    public readonly storageSize: number | undefined
+  ) {}
 }
 
 export class StreamEndpoint {
   public constructor(
     public readonly uri: string,
-    public readonly stats: StreamStats,
-  ) { }
+    public readonly stats: StreamStats
+  ) {}
 }
 
 export class StreamMetadata {
   public constructor(
     public readonly description: string,
-    public readonly labels: Readonly<Record<string, string>>,
-  ) { }
+    public readonly labels: Readonly<Record<string, string>>
+  ) {}
 }

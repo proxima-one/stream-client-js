@@ -12,11 +12,13 @@ export class BufferedStreamReader<T> {
 
   private constructor(
     private readonly stream: PausableStream<T | T[]>,
-    private readonly bufferSize: number,
-  ) {
-  }
+    private readonly bufferSize: number
+  ) {}
 
-  public static fromStream<T>(stream: PausableStream<T | T[]>, buffer?: number): BufferedStreamReader<T> {
+  public static fromStream<T>(
+    stream: PausableStream<T | T[]>,
+    buffer?: number
+  ): BufferedStreamReader<T> {
     return new BufferedStreamReader<T>(stream, buffer ?? Number.MAX_VALUE);
   }
 
@@ -28,43 +30,39 @@ export class BufferedStreamReader<T> {
   public async read(count: number): Promise<T[] | undefined> {
     this.ensureStarted();
 
-    if (count === 0)
-      return [];
+    if (count === 0) return [];
 
     await this.awaitForData();
 
-    if (this.error)
-      throw this.error;
+    if (this.error) throw this.error;
 
-    if (this.buffer.length == 0 && this.isCompleted)
-      return undefined;
+    if (this.buffer.length == 0 && this.isCompleted) return undefined;
 
     return this.dequeue(count);
   }
 
   public dispose() {
     this.resolveDataAwaiter();
-    if (!this.subscription)
-      return;
+    if (!this.subscription) return;
 
     this.subscription.unsubscribe();
     this.isCompleted = true;
   }
 
   public ensureStarted() {
-    if (this.subscription)
-      return;
+    if (this.subscription) return;
 
     this.subscription = this.stream.observable.subscribe({
       next: val => {
-        if (Array.isArray(val))
-          this.buffer.push(...val);
-        else
-          this.buffer.push(val);
+        if (Array.isArray(val)) this.buffer.push(...val);
+        else this.buffer.push(val);
 
         this.resolveDataAwaiter();
 
-        if (this.buffer.length > this.bufferSize && !this.stream.controller.isPaused) {
+        if (
+          this.buffer.length > this.bufferSize &&
+          !this.stream.controller.isPaused
+        ) {
           this.stream.controller.pause();
         }
       },
@@ -80,8 +78,7 @@ export class BufferedStreamReader<T> {
   }
 
   private async awaitForData() {
-    if (this.buffer.length > 0 || this.error || this.isCompleted)
-      return;
+    if (this.buffer.length > 0 || this.error || this.isCompleted) return;
 
     this.dataWaitLock = barrier(1);
     await this.dataWaitLock.lock;
@@ -89,14 +86,16 @@ export class BufferedStreamReader<T> {
   }
 
   private resolveDataAwaiter() {
-    if (this.dataWaitLock)
-      this.dataWaitLock.unlock();
+    if (this.dataWaitLock) this.dataWaitLock.unlock();
   }
 
   private dequeue(count: number): T[] {
     const result = this.buffer.splice(0, count);
 
-    if (this.buffer.length <= this.bufferSize && this.stream.controller.isPaused) {
+    if (
+      this.buffer.length <= this.bufferSize &&
+      this.stream.controller.isPaused
+    ) {
       this.stream.controller.resume();
     }
 

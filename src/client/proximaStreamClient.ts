@@ -1,6 +1,6 @@
 import { StreamDBConsumerClient } from "../streamdb/consumerClient";
 import { PausableStream, SimplePauseController } from "../lib/pausableStream";
-import { Offset, StreamEndpoint, StreamEvent, } from "../model";
+import { Offset, StreamEndpoint, StreamEvent } from "../model";
 import { StreamRegistryClient } from "./streamRegistryClient";
 import { StreamRegistry } from "./streamRegistry";
 import _ from "lodash";
@@ -13,10 +13,14 @@ export class ProximaStreamClient {
   private readonly clients: Record<string, StreamDBConsumerClient>;
   private readonly offsetsCache: NodeCache;
 
-  public constructor(private readonly options: StreamClientOptions = {registry: new StreamRegistryClient()}) {
+  public constructor(
+    private readonly options: StreamClientOptions = {
+      registry: new StreamRegistryClient(),
+    }
+  ) {
     this.registry = options.registry ?? new StreamRegistryClient();
     this.clients = {};
-    this.offsetsCache = new NodeCache({maxKeys: 10 * 1000 * 1000});
+    this.offsetsCache = new NodeCache({ maxKeys: 10 * 1000 * 1000 });
   }
 
   public async fetchEvents(
@@ -27,7 +31,9 @@ export class ProximaStreamClient {
   ): Promise<StreamEvent[]> {
     const endpoint = await this.findEndpointFor(stream, offset);
     if (!endpoint)
-      throw new Error(`Can't fetch events for stream ${stream} ${offset.toString()}: no endpoints found`);
+      throw new Error(
+        `Can't fetch events for stream ${stream} ${offset.toString()}: no endpoints found`
+      );
 
     const client = this.getStreamConsumerClient(endpoint.uri);
     const events = await client.getEvents(stream, offset, count, direction);
@@ -47,7 +53,9 @@ export class ProximaStreamClient {
   ): Promise<PausableStream<StreamEvent>> {
     let endpoint = await this.findEndpointFor(stream, offset);
     if (!endpoint)
-      throw new Error(`Can't fetch events for stream ${stream} ${offset.toString()}: no endpoints found`);
+      throw new Error(
+        `Can't fetch events for stream ${stream} ${offset.toString()}: no endpoints found`
+      );
 
     const controller = new SimplePauseController();
     return PausableStream.create<StreamEvent>(subscriber => {
@@ -56,8 +64,7 @@ export class ProximaStreamClient {
       let currentEventSubscription: Subscription;
 
       const init = async (waitFor?: number) => {
-        if (waitFor)
-          await sleep(waitFor);
+        if (waitFor) await sleep(waitFor);
         if (currentEventSubscription) {
           console.log("unsubscribe from streamdb");
           currentEventSubscription.unsubscribe();
@@ -65,13 +72,19 @@ export class ProximaStreamClient {
 
         endpoint = await this.findEndpointFor(stream, currentOffset);
         if (!endpoint) {
-          subscriber.error(`no endpoint for offset ${currentOffset.toString()}`);
+          subscriber.error(
+            `no endpoint for offset ${currentOffset.toString()}`
+          );
           return;
         }
 
         //new StreamDBConsumerClient(endpoint)
         const client = this.getStreamConsumerClient(endpoint.uri);
-        currentEventStream = client.getEventsStream(stream, currentOffset, controller);
+        currentEventStream = client.getEventsStream(
+          stream,
+          currentOffset,
+          controller
+        );
 
         currentEventSubscription = currentEventStream.observable.subscribe({
           next: v => {
@@ -84,38 +97,44 @@ export class ProximaStreamClient {
           },
           complete: () => {
             init();
-          }
-        })
-      }
+          },
+        });
+      };
 
       init();
 
       return () => {
-        if (currentEventSubscription)
-          currentEventSubscription.unsubscribe();
-      }
+        if (currentEventSubscription) currentEventSubscription.unsubscribe();
+      };
     }, controller);
   }
 
-  private async findEndpointFor(stream: string, offset: Offset): Promise<StreamEndpoint | undefined> {
+  private async findEndpointFor(
+    stream: string,
+    offset: Offset
+  ): Promise<StreamEndpoint | undefined> {
     const cacheKey = stream + offset.toString();
     const cachedEndpoint = this.offsetsCache.get<StreamEndpoint>(cacheKey);
-    if (cachedEndpoint)
-      return cachedEndpoint;
+    if (cachedEndpoint) return cachedEndpoint;
 
     const endpoints: StreamEndpoint[] = await this.registry.getStreamEndpoints(
       stream,
       offset
     );
 
-    const endpoint = _.maxBy(endpoints, x => x.stats.end?.height ?? Number.MAX_VALUE);
-    if (endpoint)
-      this.offsetsCache.set(cacheKey, endpoint);
+    const endpoint = _.maxBy(
+      endpoints,
+      x => x.stats.end?.height ?? Number.MAX_VALUE
+    );
+    if (endpoint) this.offsetsCache.set(cacheKey, endpoint);
     return endpoint;
   }
 
   private getStreamConsumerClient(endpoint: string) {
-    return this.clients[endpoint] ?? (this.clients[endpoint] = new StreamDBConsumerClient(endpoint));
+    return (
+      this.clients[endpoint] ??
+      (this.clients[endpoint] = new StreamDBConsumerClient(endpoint))
+    );
   }
 }
 

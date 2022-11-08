@@ -65,7 +65,7 @@ export class Timestamp {
 
   public static max(timestamps: Timestamp[]) {
     let res: Timestamp | undefined = undefined;
-    for (let timestamp of timestamps) {
+    for (const timestamp of timestamps) {
       if (!res || res.lessThan(timestamp)) res = timestamp;
     }
     return res;
@@ -73,7 +73,7 @@ export class Timestamp {
 
   public static min(timestamps: Timestamp[]) {
     let res: Timestamp | undefined = undefined;
-    for (let timestamp of timestamps) {
+    for (const timestamp of timestamps) {
       if (!res || res.greaterThan(timestamp)) res = timestamp;
     }
     return res;

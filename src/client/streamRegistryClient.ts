@@ -30,13 +30,23 @@ export class StreamRegistryClient implements StreamRegistry {
     });
   }
 
-  public async getStreamEndpoints(stream: string, offset: Offset): Promise<StreamEndpoint[]> {
-    const resp = await this.call(async () => await this.client.get(`/streams/${stream}/offsets/${offset.toString()}/endpoints`));
+  public async getStreamEndpoints(
+    stream: string,
+    offset: Offset
+  ): Promise<StreamEndpoint[]> {
+    const resp = await this.call(
+      async () =>
+        await this.client.get(
+          `/streams/${stream}/offsets/${offset.toString()}/endpoints`
+        )
+    );
     return parseStreamEndpoints(JSON.parse(resp.data));
   }
 
   public async findStreams(filter: StreamFilter): Promise<Stream[]> {
-    const resp = await this.call(async () => await this.client.post(`/streams/search`, filter));
+    const resp = await this.call(
+      async () => await this.client.post(`/streams/search`, filter)
+    );
     return parseStreams(JSON.parse(resp.data));
   }
 
@@ -46,10 +56,14 @@ export class StreamRegistryClient implements StreamRegistry {
   }
 
   public async findStream(stream: string): Promise<Stream | undefined> {
-    const resp = await this.call(async () => await this.client.get(`/streams/${stream}`, {validateStatus: x => x != 404}));
+    const resp = await this.call(
+      async () =>
+        await this.client.get(`/streams/${stream}`, {
+          validateStatus: x => x != 404,
+        })
+    );
 
-    if (resp.status == 404)
-      return undefined;
+    if (resp.status == 404) return undefined;
 
     return parseStream(JSON.parse(resp.data));
   }
@@ -59,14 +73,19 @@ export class StreamRegistryClient implements StreamRegistry {
     height?: number,
     timestampMs?: number
   ): Promise<Offset | undefined> {
-    const resp = await this.call(async () => await this.client.get(`/streams/${stream}/offsets/find`, {
-      params: {
-        height: height,
-        timestamp: timestampMs
-      },
-    }));
+    const resp = await this.call(
+      async () =>
+        await this.client.get(`/streams/${stream}/offsets/find`, {
+          params: {
+            height: height,
+            timestamp: timestampMs,
+          },
+        })
+    );
 
-    return Offset.fromString(Parsing.parseStringProperty(JSON.parse(resp.data), "id"));
+    return Offset.fromString(
+      Parsing.parseStringProperty(JSON.parse(resp.data), "id")
+    );
   }
 
   private async call<T>(func: () => Promise<T>) {
@@ -85,15 +104,21 @@ function parseStreams(data: unknown): Stream[] {
 
 function parseStream(data: unknown): Stream {
   const metadata = Parsing.parseProperty(data, "metadata");
-  const endpoints = Parsing.parsePropertyOrNull(data, "endpoints") as Record<string, unknown>;
+  const endpoints = Parsing.parsePropertyOrNull(data, "endpoints") as Record<
+    string,
+    unknown
+  >;
 
   return new Stream(
     Parsing.parseStringProperty(data, "name"),
     new StreamMetadata(
       Parsing.parseStringOrNullProperty(metadata, "description") ?? "",
-      (Parsing.parseProperty(metadata, "labels") ?? {}) as Record<string, string>
+      (Parsing.parseProperty(metadata, "labels") ?? {}) as Record<
+        string,
+        string
+      >
     ),
-    endpoints ? mapLookup(endpoints, parseStreamEndpoint) : {},
+    endpoints ? mapLookup(endpoints, parseStreamEndpoint) : {}
   );
 }
 
@@ -105,15 +130,15 @@ function parseStreamEndpoints(data: unknown): StreamEndpoint[] {
 function parseStreamEndpoint(endpoint: unknown): StreamEndpoint {
   const stats = Parsing.parseProperty(endpoint, "stats");
 
-  return ({
+  return {
     uri: Parsing.parseStringProperty(endpoint, "uri"),
     stats: {
       start: Offset.fromString(Parsing.parseStringProperty(stats, "start")),
       end: Offset.fromString(Parsing.parseStringProperty(stats, "end")),
       length: Parsing.parseNumberProperty(stats, "length"),
       storageSize: Parsing.parseNumberProperty(stats, "storageSize"),
-    }
-  });
+    },
+  };
 }
 
 export interface StreamFilter {

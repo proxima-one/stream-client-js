@@ -1,4 +1,3 @@
-import { strict as assert } from "assert";
 import { ProximaStreamClient } from "../../src";
 
 describe("StreamClient", () => {
