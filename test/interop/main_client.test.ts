@@ -1,8 +1,5 @@
-import { ProximaStreamClient } from "../../src";
-
 describe("StreamClient", () => {
-  jest.setTimeout(30000)
-  const client = new ProximaStreamClient();
+  jest.setTimeout(30000);
 
-  // todo: create new tests for StreamRegistry and StreamClient separately
+  it("no tests by now :(", () => {});
 });
