@@ -15,7 +15,12 @@ import {
 } from "@grpc/grpc-js";
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { Offset, StateTransition, Stream, Timestamp } from "../../model/v1/model";
+import {
+  Offset,
+  StateTransition,
+  Stream,
+  Timestamp,
+} from "../../model/v1/model";
 
 export const protobufPackage = "stream_consumer.v1alpha1";
 
@@ -95,7 +100,10 @@ function createBaseFindStreamRequest(): FindStreamRequest {
 }
 
 export const FindStreamRequest = {
-  encode(message: FindStreamRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: FindStreamRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.streamId !== "") {
       writer.uint32(10).string(message.streamId);
     }
@@ -130,7 +138,9 @@ export const FindStreamRequest = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<FindStreamRequest>, I>>(object: I): FindStreamRequest {
+  fromPartial<I extends Exact<DeepPartial<FindStreamRequest>, I>>(
+    object: I
+  ): FindStreamRequest {
     const message = createBaseFindStreamRequest();
     message.streamId = object.streamId ?? "";
     return message;
@@ -142,7 +152,10 @@ function createBaseFindStreamResponse(): FindStreamResponse {
 }
 
 export const FindStreamResponse = {
-  encode(message: FindStreamResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: FindStreamResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.stream !== undefined) {
       Stream.encode(message.stream, writer.uint32(10).fork()).ldelim();
     }
@@ -168,20 +181,26 @@ export const FindStreamResponse = {
   },
 
   fromJSON(object: any): FindStreamResponse {
-    return { stream: isSet(object.stream) ? Stream.fromJSON(object.stream) : undefined };
+    return {
+      stream: isSet(object.stream) ? Stream.fromJSON(object.stream) : undefined,
+    };
   },
 
   toJSON(message: FindStreamResponse): unknown {
     const obj: any = {};
-    message.stream !== undefined && (obj.stream = message.stream ? Stream.toJSON(message.stream) : undefined);
+    message.stream !== undefined &&
+      (obj.stream = message.stream ? Stream.toJSON(message.stream) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<FindStreamResponse>, I>>(object: I): FindStreamResponse {
+  fromPartial<I extends Exact<DeepPartial<FindStreamResponse>, I>>(
+    object: I
+  ): FindStreamResponse {
     const message = createBaseFindStreamResponse();
-    message.stream = (object.stream !== undefined && object.stream !== null)
-      ? Stream.fromPartial(object.stream)
-      : undefined;
+    message.stream =
+      object.stream !== undefined && object.stream !== null
+        ? Stream.fromPartial(object.stream)
+        : undefined;
     return message;
   },
 };
@@ -191,7 +210,10 @@ function createBaseFindOffsetRequest(): FindOffsetRequest {
 }
 
 export const FindOffsetRequest = {
-  encode(message: FindOffsetRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: FindOffsetRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.streamId !== "") {
       writer.uint32(10).string(message.streamId);
     }
@@ -232,7 +254,9 @@ export const FindOffsetRequest = {
     return {
       streamId: isSet(object.streamId) ? String(object.streamId) : "",
       height: isSet(object.height) ? Number(object.height) : undefined,
-      timestamp: isSet(object.timestamp) ? Timestamp.fromJSON(object.timestamp) : undefined,
+      timestamp: isSet(object.timestamp)
+        ? Timestamp.fromJSON(object.timestamp)
+        : undefined,
     };
   },
 
@@ -241,17 +265,22 @@ export const FindOffsetRequest = {
     message.streamId !== undefined && (obj.streamId = message.streamId);
     message.height !== undefined && (obj.height = Math.round(message.height));
     message.timestamp !== undefined &&
-      (obj.timestamp = message.timestamp ? Timestamp.toJSON(message.timestamp) : undefined);
+      (obj.timestamp = message.timestamp
+        ? Timestamp.toJSON(message.timestamp)
+        : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<FindOffsetRequest>, I>>(object: I): FindOffsetRequest {
+  fromPartial<I extends Exact<DeepPartial<FindOffsetRequest>, I>>(
+    object: I
+  ): FindOffsetRequest {
     const message = createBaseFindOffsetRequest();
     message.streamId = object.streamId ?? "";
     message.height = object.height ?? undefined;
-    message.timestamp = (object.timestamp !== undefined && object.timestamp !== null)
-      ? Timestamp.fromPartial(object.timestamp)
-      : undefined;
+    message.timestamp =
+      object.timestamp !== undefined && object.timestamp !== null
+        ? Timestamp.fromPartial(object.timestamp)
+        : undefined;
     return message;
   },
 };
@@ -261,7 +290,10 @@ function createBaseFindOffsetResponse(): FindOffsetResponse {
 }
 
 export const FindOffsetResponse = {
-  encode(message: FindOffsetResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: FindOffsetResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.offset !== undefined) {
       Offset.encode(message.offset, writer.uint32(10).fork()).ldelim();
     }
@@ -287,20 +319,26 @@ export const FindOffsetResponse = {
   },
 
   fromJSON(object: any): FindOffsetResponse {
-    return { offset: isSet(object.offset) ? Offset.fromJSON(object.offset) : undefined };
+    return {
+      offset: isSet(object.offset) ? Offset.fromJSON(object.offset) : undefined,
+    };
   },
 
   toJSON(message: FindOffsetResponse): unknown {
     const obj: any = {};
-    message.offset !== undefined && (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
+    message.offset !== undefined &&
+      (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<FindOffsetResponse>, I>>(object: I): FindOffsetResponse {
+  fromPartial<I extends Exact<DeepPartial<FindOffsetResponse>, I>>(
+    object: I
+  ): FindOffsetResponse {
     const message = createBaseFindOffsetResponse();
-    message.offset = (object.offset !== undefined && object.offset !== null)
-      ? Offset.fromPartial(object.offset)
-      : undefined;
+    message.offset =
+      object.offset !== undefined && object.offset !== null
+        ? Offset.fromPartial(object.offset)
+        : undefined;
     return message;
   },
 };
@@ -310,7 +348,10 @@ function createBaseGetStateTransitionsRequest(): GetStateTransitionsRequest {
 }
 
 export const GetStateTransitionsRequest = {
-  encode(message: GetStateTransitionsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: GetStateTransitionsRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.streamId !== "") {
       writer.uint32(10).string(message.streamId);
     }
@@ -326,7 +367,10 @@ export const GetStateTransitionsRequest = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): GetStateTransitionsRequest {
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): GetStateTransitionsRequest {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetStateTransitionsRequest();
@@ -358,25 +402,32 @@ export const GetStateTransitionsRequest = {
       streamId: isSet(object.streamId) ? String(object.streamId) : "",
       offset: isSet(object.offset) ? Offset.fromJSON(object.offset) : undefined,
       count: isSet(object.count) ? Number(object.count) : 0,
-      direction: isSet(object.direction) ? directionFromJSON(object.direction) : 0,
+      direction: isSet(object.direction)
+        ? directionFromJSON(object.direction)
+        : 0,
     };
   },
 
   toJSON(message: GetStateTransitionsRequest): unknown {
     const obj: any = {};
     message.streamId !== undefined && (obj.streamId = message.streamId);
-    message.offset !== undefined && (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
+    message.offset !== undefined &&
+      (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
     message.count !== undefined && (obj.count = Math.round(message.count));
-    message.direction !== undefined && (obj.direction = directionToJSON(message.direction));
+    message.direction !== undefined &&
+      (obj.direction = directionToJSON(message.direction));
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<GetStateTransitionsRequest>, I>>(object: I): GetStateTransitionsRequest {
+  fromPartial<I extends Exact<DeepPartial<GetStateTransitionsRequest>, I>>(
+    object: I
+  ): GetStateTransitionsRequest {
     const message = createBaseGetStateTransitionsRequest();
     message.streamId = object.streamId ?? "";
-    message.offset = (object.offset !== undefined && object.offset !== null)
-      ? Offset.fromPartial(object.offset)
-      : undefined;
+    message.offset =
+      object.offset !== undefined && object.offset !== null
+        ? Offset.fromPartial(object.offset)
+        : undefined;
     message.count = object.count ?? 0;
     message.direction = object.direction ?? 0;
     return message;
@@ -388,14 +439,20 @@ function createBaseGetStateTransitionsResponse(): GetStateTransitionsResponse {
 }
 
 export const GetStateTransitionsResponse = {
-  encode(message: GetStateTransitionsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: GetStateTransitionsResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     for (const v of message.stateTransitions) {
       StateTransition.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): GetStateTransitionsResponse {
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): GetStateTransitionsResponse {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetStateTransitionsResponse();
@@ -403,7 +460,9 @@ export const GetStateTransitionsResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.stateTransitions.push(StateTransition.decode(reader, reader.uint32()));
+          message.stateTransitions.push(
+            StateTransition.decode(reader, reader.uint32())
+          );
           break;
         default:
           reader.skipType(tag & 7);
@@ -424,16 +483,21 @@ export const GetStateTransitionsResponse = {
   toJSON(message: GetStateTransitionsResponse): unknown {
     const obj: any = {};
     if (message.stateTransitions) {
-      obj.stateTransitions = message.stateTransitions.map((e) => e ? StateTransition.toJSON(e) : undefined);
+      obj.stateTransitions = message.stateTransitions.map(e =>
+        e ? StateTransition.toJSON(e) : undefined
+      );
     } else {
       obj.stateTransitions = [];
     }
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<GetStateTransitionsResponse>, I>>(object: I): GetStateTransitionsResponse {
+  fromPartial<I extends Exact<DeepPartial<GetStateTransitionsResponse>, I>>(
+    object: I
+  ): GetStateTransitionsResponse {
     const message = createBaseGetStateTransitionsResponse();
-    message.stateTransitions = object.stateTransitions?.map((e) => StateTransition.fromPartial(e)) || [];
+    message.stateTransitions =
+      object.stateTransitions?.map(e => StateTransition.fromPartial(e)) || [];
     return message;
   },
 };
@@ -443,7 +507,10 @@ function createBaseStreamStateTransitionsRequest(): StreamStateTransitionsReques
 }
 
 export const StreamStateTransitionsRequest = {
-  encode(message: StreamStateTransitionsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: StreamStateTransitionsRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     if (message.streamId !== "") {
       writer.uint32(10).string(message.streamId);
     }
@@ -453,7 +520,10 @@ export const StreamStateTransitionsRequest = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): StreamStateTransitionsRequest {
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): StreamStateTransitionsRequest {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseStreamStateTransitionsRequest();
@@ -484,18 +554,20 @@ export const StreamStateTransitionsRequest = {
   toJSON(message: StreamStateTransitionsRequest): unknown {
     const obj: any = {};
     message.streamId !== undefined && (obj.streamId = message.streamId);
-    message.offset !== undefined && (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
+    message.offset !== undefined &&
+      (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<StreamStateTransitionsRequest>, I>>(
-    object: I,
+    object: I
   ): StreamStateTransitionsRequest {
     const message = createBaseStreamStateTransitionsRequest();
     message.streamId = object.streamId ?? "";
-    message.offset = (object.offset !== undefined && object.offset !== null)
-      ? Offset.fromPartial(object.offset)
-      : undefined;
+    message.offset =
+      object.offset !== undefined && object.offset !== null
+        ? Offset.fromPartial(object.offset)
+        : undefined;
     return message;
   },
 };
@@ -505,14 +577,20 @@ function createBaseStreamStateTransitionsResponse(): StreamStateTransitionsRespo
 }
 
 export const StreamStateTransitionsResponse = {
-  encode(message: StreamStateTransitionsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(
+    message: StreamStateTransitionsResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
     for (const v of message.stateTransition) {
       StateTransition.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): StreamStateTransitionsResponse {
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): StreamStateTransitionsResponse {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseStreamStateTransitionsResponse();
@@ -520,7 +598,9 @@ export const StreamStateTransitionsResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.stateTransition.push(StateTransition.decode(reader, reader.uint32()));
+          message.stateTransition.push(
+            StateTransition.decode(reader, reader.uint32())
+          );
           break;
         default:
           reader.skipType(tag & 7);
@@ -541,7 +621,9 @@ export const StreamStateTransitionsResponse = {
   toJSON(message: StreamStateTransitionsResponse): unknown {
     const obj: any = {};
     if (message.stateTransition) {
-      obj.stateTransition = message.stateTransition.map((e) => e ? StateTransition.toJSON(e) : undefined);
+      obj.stateTransition = message.stateTransition.map(e =>
+        e ? StateTransition.toJSON(e) : undefined
+      );
     } else {
       obj.stateTransition = [];
     }
@@ -549,10 +631,11 @@ export const StreamStateTransitionsResponse = {
   },
 
   fromPartial<I extends Exact<DeepPartial<StreamStateTransitionsResponse>, I>>(
-    object: I,
+    object: I
   ): StreamStateTransitionsResponse {
     const message = createBaseStreamStateTransitionsResponse();
-    message.stateTransition = object.stateTransition?.map((e) => StateTransition.fromPartial(e)) || [];
+    message.stateTransition =
+      object.stateTransition?.map(e => StateTransition.fromPartial(e)) || [];
     return message;
   },
 };
@@ -563,18 +646,22 @@ export const StreamConsumerServiceService = {
     path: "/stream_consumer.v1alpha1.StreamConsumerService/FindStream",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: FindStreamRequest) => Buffer.from(FindStreamRequest.encode(value).finish()),
+    requestSerialize: (value: FindStreamRequest) =>
+      Buffer.from(FindStreamRequest.encode(value).finish()),
     requestDeserialize: (value: Buffer) => FindStreamRequest.decode(value),
-    responseSerialize: (value: FindStreamResponse) => Buffer.from(FindStreamResponse.encode(value).finish()),
+    responseSerialize: (value: FindStreamResponse) =>
+      Buffer.from(FindStreamResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => FindStreamResponse.decode(value),
   },
   findOffset: {
     path: "/stream_consumer.v1alpha1.StreamConsumerService/FindOffset",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: FindOffsetRequest) => Buffer.from(FindOffsetRequest.encode(value).finish()),
+    requestSerialize: (value: FindOffsetRequest) =>
+      Buffer.from(FindOffsetRequest.encode(value).finish()),
     requestDeserialize: (value: Buffer) => FindOffsetRequest.decode(value),
-    responseSerialize: (value: FindOffsetResponse) => Buffer.from(FindOffsetResponse.encode(value).finish()),
+    responseSerialize: (value: FindOffsetResponse) =>
+      Buffer.from(FindOffsetResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => FindOffsetResponse.decode(value),
   },
   getStateTransitions: {
@@ -583,10 +670,12 @@ export const StreamConsumerServiceService = {
     responseStream: false,
     requestSerialize: (value: GetStateTransitionsRequest) =>
       Buffer.from(GetStateTransitionsRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetStateTransitionsRequest.decode(value),
+    requestDeserialize: (value: Buffer) =>
+      GetStateTransitionsRequest.decode(value),
     responseSerialize: (value: GetStateTransitionsResponse) =>
       Buffer.from(GetStateTransitionsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => GetStateTransitionsResponse.decode(value),
+    responseDeserialize: (value: Buffer) =>
+      GetStateTransitionsResponse.decode(value),
   },
   streamStateTransitions: {
     path: "/stream_consumer.v1alpha1.StreamConsumerService/StreamStateTransitions",
@@ -594,85 +683,103 @@ export const StreamConsumerServiceService = {
     responseStream: true,
     requestSerialize: (value: StreamStateTransitionsRequest) =>
       Buffer.from(StreamStateTransitionsRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => StreamStateTransitionsRequest.decode(value),
+    requestDeserialize: (value: Buffer) =>
+      StreamStateTransitionsRequest.decode(value),
     responseSerialize: (value: StreamStateTransitionsResponse) =>
       Buffer.from(StreamStateTransitionsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => StreamStateTransitionsResponse.decode(value),
+    responseDeserialize: (value: Buffer) =>
+      StreamStateTransitionsResponse.decode(value),
   },
 } as const;
 
-export interface StreamConsumerServiceServer extends UntypedServiceImplementation {
+export interface StreamConsumerServiceServer
+  extends UntypedServiceImplementation {
   findStream: handleUnaryCall<FindStreamRequest, FindStreamResponse>;
   findOffset: handleUnaryCall<FindOffsetRequest, FindOffsetResponse>;
-  getStateTransitions: handleUnaryCall<GetStateTransitionsRequest, GetStateTransitionsResponse>;
-  streamStateTransitions: handleServerStreamingCall<StreamStateTransitionsRequest, StreamStateTransitionsResponse>;
+  getStateTransitions: handleUnaryCall<
+    GetStateTransitionsRequest,
+    GetStateTransitionsResponse
+  >;
+  streamStateTransitions: handleServerStreamingCall<
+    StreamStateTransitionsRequest,
+    StreamStateTransitionsResponse
+  >;
 }
 
 export interface StreamConsumerServiceClient extends Client {
   findStream(
     request: FindStreamRequest,
-    callback: (error: ServiceError | null, response: FindStreamResponse) => void,
+    callback: (error: ServiceError | null, response: FindStreamResponse) => void
   ): ClientUnaryCall;
   findStream(
     request: FindStreamRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: FindStreamResponse) => void,
+    callback: (error: ServiceError | null, response: FindStreamResponse) => void
   ): ClientUnaryCall;
   findStream(
     request: FindStreamRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: FindStreamResponse) => void,
+    callback: (error: ServiceError | null, response: FindStreamResponse) => void
   ): ClientUnaryCall;
   findOffset(
     request: FindOffsetRequest,
-    callback: (error: ServiceError | null, response: FindOffsetResponse) => void,
+    callback: (error: ServiceError | null, response: FindOffsetResponse) => void
   ): ClientUnaryCall;
   findOffset(
     request: FindOffsetRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: FindOffsetResponse) => void,
+    callback: (error: ServiceError | null, response: FindOffsetResponse) => void
   ): ClientUnaryCall;
   findOffset(
     request: FindOffsetRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: FindOffsetResponse) => void,
+    callback: (error: ServiceError | null, response: FindOffsetResponse) => void
   ): ClientUnaryCall;
   getStateTransitions(
     request: GetStateTransitionsRequest,
-    callback: (error: ServiceError | null, response: GetStateTransitionsResponse) => void,
+    callback: (
+      error: ServiceError | null,
+      response: GetStateTransitionsResponse
+    ) => void
   ): ClientUnaryCall;
   getStateTransitions(
     request: GetStateTransitionsRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: GetStateTransitionsResponse) => void,
+    callback: (
+      error: ServiceError | null,
+      response: GetStateTransitionsResponse
+    ) => void
   ): ClientUnaryCall;
   getStateTransitions(
     request: GetStateTransitionsRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: GetStateTransitionsResponse) => void,
+    callback: (
+      error: ServiceError | null,
+      response: GetStateTransitionsResponse
+    ) => void
   ): ClientUnaryCall;
   streamStateTransitions(
     request: StreamStateTransitionsRequest,
-    options?: Partial<CallOptions>,
+    options?: Partial<CallOptions>
   ): ClientReadableStream<StreamStateTransitionsResponse>;
   streamStateTransitions(
     request: StreamStateTransitionsRequest,
     metadata?: Metadata,
-    options?: Partial<CallOptions>,
+    options?: Partial<CallOptions>
   ): ClientReadableStream<StreamStateTransitionsResponse>;
 }
 
 export const StreamConsumerServiceClient = makeGenericClientConstructor(
   StreamConsumerServiceService,
-  "stream_consumer.v1alpha1.StreamConsumerService",
+  "stream_consumer.v1alpha1.StreamConsumerService"
 ) as unknown as {
   new (
     address: string,
     credentials: ChannelCredentials,
-    options?: Partial<ChannelOptions>,
+    options?: Partial<ChannelOptions>
   ): StreamConsumerServiceClient;
   service: typeof StreamConsumerServiceService;
 };
@@ -696,16 +803,31 @@ var globalThis: any = (() => {
   throw "Unable to locate global object";
 })();
 
-type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+type Builtin =
+  | Date
+  | Function
+  | Uint8Array
+  | string
+  | number
+  | boolean
+  | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends Array<infer U>
+  ? Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U>
+  ? ReadonlyArray<DeepPartial<U>>
+  : T extends {}
+  ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+export type Exact<P, I extends P> = P extends Builtin
+  ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & {
+      [K in Exclude<keyof I, KeysOfUnion<P>>]: never;
+    };
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
