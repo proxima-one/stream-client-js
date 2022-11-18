@@ -1,4 +1,4 @@
-import axios, { Axios } from "axios";
+import { Axios } from "axios";
 import { Offset, Stream, StreamEndpoint, StreamMetadata } from "../model";
 import { execAndReturnWithRetry, mapLookup, Parsing } from "../utils";
 import { StreamRegistry } from "./streamRegistry";
@@ -25,7 +25,7 @@ export class StreamRegistryClient implements StreamRegistry {
   public constructor(
     private readonly options: StreamRegistryOptions = DefaultRegistryClientOptions
   ) {
-    this.client = new axios.Axios({
+    this.client = new Axios({
       baseURL: options.endpoint,
     });
   }

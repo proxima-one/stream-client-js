@@ -19,7 +19,7 @@ export class StreamDBConsumerClient {
       ? grpc.credentials.createSsl()
       : grpc.credentials.createInsecure();
     this.consumer = new StreamConsumerServiceClient(uri, credentials, {
-      "grpc.keepalive_timeout_ms": 10 * 1000,
+      "grpc.keepalive_timeout_ms": 100 * 1000,
       "grpc.keepalive_time_ms": 100 * 1000,
       "grpc.keepalive_permit_without_calls": 1,
       "grpc.max_receive_message_length": 100 * 1024 * 1024,

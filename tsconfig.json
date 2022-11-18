@@ -26,10 +26,10 @@
     "**/__mocks__/*",
     "**/__tests__/*",
     "**/*.spec.ts",
+    "**/*.e2e.ts",
     "**/*.test.ts"
   ],
   "include": [
     "src/**/*",
-    "src/**/*.json", 
-    "src/samples" ]
+    "src/**/*.json", "test/interop/main_client.test.e2e.ts"]
 }

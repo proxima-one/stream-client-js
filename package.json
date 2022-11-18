@@ -24,6 +24,7 @@
     "codegen": "buf generate",
     "dev": "ts-node ./src/dev.ts",
     "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
+    "test:e2e": "jest \".*\\.(e2e)\\.ts$\" --coverage",
     "pub": "lerna publish --no-verify-access",
     "samples:eth_block_parsing": "ts-node ./samples/ethereum_block_parsing.ts"
   },
