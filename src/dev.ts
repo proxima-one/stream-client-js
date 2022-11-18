@@ -18,7 +18,7 @@ async function main() {
 
   const streamRegistry = new StreamRegistryClient();
   const allStreams = await streamRegistry.getStreams();
-  console.log(allStreams.map(x => x.name));
+  console.dir(allStreams, { depth: 10 });
 
   let currentOffset = Offset.zero;
   for (let i = 0; i < 10; i++) {
