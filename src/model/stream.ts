@@ -1,10 +1,10 @@
-import { Offset } from ".";
+import { Offset, Timestamp } from ".";
 
 export class StreamEvent {
   public constructor(
     public readonly offset: Offset,
     public readonly payload: Uint8Array,
-    public readonly timestamp: number,
+    public readonly timestamp: Timestamp,
     public readonly undo: boolean
   ) {}
 
@@ -22,7 +22,7 @@ export class TypedStreamEvent<T> {
   public constructor(
     public readonly offset: Offset,
     public readonly payload: T,
-    public readonly timestamp: number,
+    public readonly timestamp: Timestamp,
     public readonly undo: boolean
   ) {}
 }

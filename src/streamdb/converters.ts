@@ -12,7 +12,7 @@ export function stateTransitionProtoToStreamEvent(
     transition.event.payload,
     transition.event.timestamp
       ? protoToTimestamp(transition.event.timestamp)
-      : 0,
+      : Timestamp.zero,
     transition.event.undo
   );
 }
@@ -26,8 +26,8 @@ export function timestampToProto(timestamp: number): proto_model.Timestamp {
 
 export function protoToTimestamp(
   timestampProto: proto_model.Timestamp
-): number {
-  return timestampProto.epochMs;
+): Timestamp {
+  return new Timestamp(timestampProto.epochMs, timestampProto.parts);
 }
 
 export function protoToOffset(offsetProto: proto_model.Offset): Offset {

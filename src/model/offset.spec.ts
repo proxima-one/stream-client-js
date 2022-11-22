@@ -5,7 +5,7 @@ describe("Offset", () => {
   it("can be serialized/deserialized to string", () => {
     const sut = new Offset(
       "0x123123123",
-      BigInt(213423213234234234234),
+      BigInt(21342321323423),
       new Timestamp(1667073019000, ["part1", 123])
     );
     console.log(sut.toString());

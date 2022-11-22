@@ -90,8 +90,7 @@ export class Timestamp {
 
   public static fromString(value: string): Timestamp {
     const partsSeparatorIdx = value.indexOf("~");
-    if (partsSeparatorIdx < 0)
-      return this.fromEpochMs(value);
+    if (partsSeparatorIdx < 0) return this.fromEpochMs(value);
 
     const partsBase64 = value.substring(partsSeparatorIdx + 1);
     const partsStr = Buffer.from(partsBase64, "base64").toString("utf-8");

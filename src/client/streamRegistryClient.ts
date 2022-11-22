@@ -45,11 +45,12 @@ export class StreamRegistryClient implements StreamRegistry {
 
   public async findStreams(filter: StreamFilter): Promise<Stream[]> {
     const resp = await this.call(
-      async () => await this.client.post(`/streams`, JSON.stringify(filter), {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+      async () =>
+        await this.client.post(`/streams`, JSON.stringify(filter), {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
     );
     return parseStreams(JSON.parse(resp.data));
   }
@@ -77,25 +78,14 @@ export class StreamRegistryClient implements StreamRegistry {
     height?: number,
     timestampMs?: number
   ): Promise<Offset | undefined> {
-    let params = {params : {}} 
-    if (height) {
-      params = {
-        params: {
-          height: height 
-        }
-      }
-    }
-    if (timestampMs) {
-      params = {
-      params: {
-        timestamp: timestampMs
-      }
-    }
-   }
-    
     const resp = await this.call(
       async () =>
-        await this.client.get(`/streams/${stream}/offsets/find`, params)
+        await this.client.get(`/streams/${stream}/offsets/find`, {
+          params: {
+            height: height,
+            timestamp: timestampMs,
+          },
+        })
     );
 
     if (resp.status == 404 || resp.data == undefined) return undefined;
