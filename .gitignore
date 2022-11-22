@@ -33,6 +33,9 @@ lib-cov
 coverage
 *.lcov
 
+# test snapshots
+test/interop/__snapshots__/
+
 # nyc test coverage
 .nyc_output
 
