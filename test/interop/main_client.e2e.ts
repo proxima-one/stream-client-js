@@ -33,18 +33,18 @@ describe("StreamRegistryClient", () => {
   it("should be able to find offsets (good and bad)", async () => {
     const registry = new StreamRegistryClient()
     //by height
-    const badOffset = await registry.findOffset(STREAM_NAME, -1)
+    const badOffset = await registry.findOffset(STREAM_NAME, 100000000)
     expect(badOffset).toBeUndefined()
     
     const offset = await registry.findOffset(STREAM_NAME, 15983284)
     expect(offset).toBeDefined()
-    if (offset) {expect(offset.height).toBe(15983284)}
+    if (offset) {expect(offset.height.toString()).toBe("15983284")}
 
-  //   //by timestamp
-    const badTimestampOffset = await registry.findOffset(STREAM_NAME, -1, -1)
+    //by timestamp
+    const badTimestampOffset = await registry.findOffset(STREAM_NAME)
     expect(badTimestampOffset).toBeUndefined()
     
-    const timestampOffset = await registry.findOffset(STREAM_NAME, -1, 1668610127000)
+    const timestampOffset = await registry.findOffset(STREAM_NAME, 0, 1668610127000)
     expect(timestampOffset).toBeDefined()
     if (timestampOffset) {expect(timestampOffset.timestamp.epochMs).toBe(1668610127000)}
    })
@@ -57,24 +57,22 @@ describe("ProximaStreamClient", () => {
   
   it("should fetch events of existing stream", async () => {
       const client = new ProximaStreamClient()
-      const registry = new StreamRegistryClient()
       const offset = Offset.zero;
       const count = 1000
       if (offset) {
         const nextEvents = await client.fetchEvents(STREAM_NAME, offset, count, "next")
         expect(nextEvents).toMatchSnapshot()
-        expect(nextEvents.length).toBeGreaterThan(1000)
+        expect(nextEvents.length).toBe(1000)
 
         const lastEvents = await client.fetchEvents(STREAM_NAME, offset, count, "last")
         expect(lastEvents).toMatchSnapshot()
-        expect(lastEvents.length).toBeGreaterThan(1000)
+        expect(lastEvents.length).toBe(1000)
       }
   });
 
   it("should stream events from existing stream", async () => {
     const STREAM_NAME = "proxima.eth-main.blocks.1_0"
     const client = new ProximaStreamClient()
-    const registry = new StreamRegistryClient()
     const offset = Offset.zero
     if (offset) {
       const pausableStream = await client.streamEvents(STREAM_NAME, offset)
@@ -91,7 +89,7 @@ describe("ProximaStreamClient", () => {
     if (offset) {
       const nextEvents = await client.fetchEvents(STREAM_NAME, offset, count, "next")
       expect(nextEvents).toMatchSnapshot()
-      expect(nextEvents.length).toBeGreaterThan(1000)
+      expect(nextEvents.length).toBe(1000)
     }
   })
 });

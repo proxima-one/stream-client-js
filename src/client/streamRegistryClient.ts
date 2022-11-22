@@ -63,7 +63,7 @@ export class StreamRegistryClient implements StreamRegistry {
         })
     );
 
-    if (resp.status == 404) return undefined;
+    if (resp.status == 404 || resp.data == undefined) return undefined;
 
     return parseStream(JSON.parse(resp.data));
   }
@@ -73,15 +73,28 @@ export class StreamRegistryClient implements StreamRegistry {
     height?: number,
     timestampMs?: number
   ): Promise<Offset | undefined> {
+    let params = {params : {}} 
+    if (height) {
+      params = {
+        params: {
+          height: height 
+        }
+      }
+    }
+    if (timestampMs) {
+      params = {
+      params: {
+        timestamp: timestampMs
+      }
+    }
+   }
+    
     const resp = await this.call(
       async () =>
-        await this.client.get(`/streams/${stream}/offsets/find`, {
-          params: {
-            height: height,
-            timestamp: timestampMs,
-          },
-        })
+        await this.client.get(`/streams/${stream}/offsets/find`, params)
     );
+
+    if (resp.status == 404 || resp.data == undefined) return undefined;
 
     return Offset.fromString(
       Parsing.parseStringProperty(JSON.parse(resp.data), "id")
