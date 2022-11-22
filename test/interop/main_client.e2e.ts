@@ -23,7 +23,6 @@ describe("StreamRegistryClient", () => {
         "encoding": "json",
       }}
       const streams = await registry.findStreams(filter)
-      expect(streams).toMatchSnapshot()
       expect(streams.length).toBeGreaterThan(0)
       streams.forEach((value) => {
         expect(value.metadata.labels["encoding"]).toBe("json")
@@ -47,6 +46,7 @@ describe("StreamRegistryClient", () => {
     const timestampOffset = await registry.findOffset(STREAM_NAME, 0, 1668610127000)
     expect(timestampOffset).toBeDefined()
     if (timestampOffset) {expect(timestampOffset.timestamp.epochMs).toBe(1668610127000)}
+
    })
 });
 

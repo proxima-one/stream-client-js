@@ -45,7 +45,11 @@ export class StreamRegistryClient implements StreamRegistry {
 
   public async findStreams(filter: StreamFilter): Promise<Stream[]> {
     const resp = await this.call(
-      async () => await this.client.post(`/streams/search`, filter)
+      async () => await this.client.post(`/streams`, JSON.stringify(filter), {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
     );
     return parseStreams(JSON.parse(resp.data));
   }
