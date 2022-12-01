@@ -4,9 +4,9 @@
 
 StreamDB Client requires [Node.js](https://nodejs.org/) v12+ to run.
 
-Install @proximaone/streamdb-client-js package 
+Install @proximaone/stream-client-js package.
 ```sh
-yarn add @proximaone/streamdb-client-js
+yarn add @proximaone/stream-client-js
 ```
 
 Install the dependencies and devDependencies.
