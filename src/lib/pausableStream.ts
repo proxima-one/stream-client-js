@@ -1,5 +1,5 @@
 import { Observable, Subscriber, TeardownLogic, OperatorFunction } from "rxjs";
-import { barrier, Barrier } from "./barrier";
+import { barrier, Barrier } from "../utils/barrier";
 
 export class PausableStream<T> {
   private constructor(
