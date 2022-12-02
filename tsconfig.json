@@ -31,5 +31,6 @@
   ],
   "include": [
     "src/**/*",
-    "src/**/*.json", "test/interop/main_client.e2e.ts"]
+    "src/**/*.json"
+  ]
 }
