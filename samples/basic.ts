@@ -8,8 +8,8 @@ export function decodeJson(binary: Uint8Array): any {
 async function main() {
     const client = new ProximaStreamClient();
     const name = "proxima.eth-main.blocks.1_0";
-    const pausable = await client.streamEvents(name, Offset.zero);
-    pausable.observable.forEach(event => {
+    const pauseable = await client.streamEvents(name, Offset.zero);
+    pauseable.observable.forEach(event => {
         console.log({
             offset: event.offset,
             payload: decodeJson(event.payload),

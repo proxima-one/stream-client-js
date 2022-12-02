@@ -16,7 +16,7 @@ async function main() {
             console.log(`Stream ${stream.name} (${stream.metadata.description}) has unknown encoding: ${encoding}`);
             return;
         }
-        const events = await client.fetchEvents(stream.name, Offset.zero, 1, "last");
+        const events = await client.fetchEvents(stream.name, Offset.zero, 1, "next");
         assert(events.length == 1);
         const event = events.pop()!;
         console.log(`Stream: ${stream.name} (${stream.metadata.description})`);

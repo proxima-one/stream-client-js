@@ -8,11 +8,12 @@ export function sleep(ms: number): Promise<void> {
 async function main() {
     const client = new ProximaStreamClient();
     const name = "proxima.eth-main.blocks.1_0";
-    const pausable = await client.streamEvents(name, Offset.zero);
-    const bufferedStream = BufferedStreamReader.fromStream(pausable);
+    const pauseable = await client.streamEvents(name, Offset.zero);
+    const bufferSize = 10000;
     const chunkSize = 1000;
+    const streamReader = BufferedStreamReader.fromStream(pauseable, bufferSize);
     while (true) {
-        const chunk = await bufferedStream.read(chunkSize);
+        const chunk = await streamReader.read(chunkSize);
         if (chunk === undefined) {
             console.log("Completed");
             break;
