@@ -63,7 +63,6 @@ export class StreamDBConsumerClient {
     offset: Offset,
     controller?: StreamController
   ): PausableStream<StreamEvent> {
-    console.log(offsetToProto(offset));
     const grpcStreamResponse = this.consumer.streamStateTransitions(
       StreamStateTransitionsRequest.fromPartial({
         streamId: stream,
