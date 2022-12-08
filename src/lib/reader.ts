@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { PausableStream } from "./pausableStream";
 import { Subscription } from "rxjs";
-import { barrier, Barrier } from "./barrier";
+import { barrier, Barrier } from "../utils/barrier";
 
 export class BufferedStreamReader<T> {
   public readonly buffer: T[] = [];
