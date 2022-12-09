@@ -27,6 +27,7 @@ export class StreamRegistryClient implements StreamRegistry {
   ) {
     this.client = new Axios({
       baseURL: options.endpoint,
+      validateStatus: status => status >= 200 && status < 300,
     });
   }
 
