@@ -8,7 +8,7 @@ export class Parsing {
       return obj[_.upperFirst(prop)];
 
     throw new DTOParsingError(
-      `Object is missing property: ${prop}, object: ${obj}`
+      `Object is missing property: ${prop}, object: ${JSON.stringify(obj)}`
     );
   }
 
@@ -38,7 +38,9 @@ export class Parsing {
   public static parseArray(result: unknown): unknown[] {
     if (!Array.isArray(result))
       throw new DTOParsingError(
-        `Object has wrong type, expected: array, got: ${typeof result}, object: ${result}`
+        `Object has wrong type, expected: array, got: ${typeof result}, object: ${JSON.stringify(
+          result
+        )}`
       );
 
     return result;
@@ -51,7 +53,9 @@ export class Parsing {
     if (typeof result === "string") return parseFloat(result);
 
     throw new DTOParsingError(
-      `Object has property ${prop} of wrong type, expected: number, got: ${typeof result}, object: ${obj}`
+      `Object has property ${prop} of wrong type, expected: number, got: ${typeof result}, object: ${JSON.stringify(
+        obj
+      )}`
     );
   }
 
@@ -67,7 +71,9 @@ export class Parsing {
 
     if (typeof result !== "number") {
       throw new DTOParsingError(
-        `Object has property ${prop} of wrong type, expected: number, got: ${typeof result}, object: ${obj}`
+        `Object has property ${prop} of wrong type, expected: number, got: ${typeof result}, object: ${JSON.stringify(
+          obj
+        )}`
       );
     }
     return result;
@@ -137,7 +143,9 @@ export class Parsing {
 
     if (typeof result !== "string")
       throw new DTOParsingError(
-        `Object has property ${prop} of wrong type, expected: string, got: ${typeof result}, object: ${obj}`
+        `Object has property ${prop} of wrong type, expected: string, got: ${typeof result}, object: ${JSON.stringify(
+          obj
+        )}`
       );
 
     return result;
@@ -165,7 +173,9 @@ export class Parsing {
     const result = Parsing.parseProperty(obj, prop);
     if (typeof result !== "boolean")
       throw new DTOParsingError(
-        `Object has property ${prop} of wrong type, expected: bool, got: ${typeof result}, object: ${obj}`
+        `Object has property ${prop} of wrong type, expected: bool, got: ${typeof result}, object: ${JSON.stringify(
+          obj
+        )}`
       );
 
     return result;
@@ -180,7 +190,9 @@ export class Parsing {
     const result = Parsing.parseProperty(obj, prop);
     if (typeof result !== "boolean")
       throw new DTOParsingError(
-        `Object has property ${prop} of wrong type, expected: bool, got: ${typeof result}, object: ${obj}`
+        `Object has property ${prop} of wrong type, expected: bool, got: ${typeof result}, object: ${JSON.stringify(
+          obj
+        )}`
       );
 
     return result;
