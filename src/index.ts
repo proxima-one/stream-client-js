@@ -1,3 +1,3 @@
 export * from "./client";
-export * from "./streamReader";
+export * from "./lib";
 export * from "./model";

@@ -1,11 +1,11 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "0.7.0",
-  "description": "Client to Proxima StreamDB",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.2.0",
+  "description": "Proxima Streams client library",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "dist",
+    "build",
     "lib"
   ],
   "publishConfig": {
@@ -13,21 +13,30 @@
   },
   "author": "proxima.one",
   "license": "MIT",
+  "repository": "https://github.com/proxima-one/stream-client-js",
   "scripts": {
-    "clean": "rimraf -rf dist && rimraf tsconfig.tsbuildinfo && rimraf coverage",
-    "format": "prettier --write \"{src,test}/**/*.ts\" \"!src/gen/**\" --double-quote --trailing-comma es5",
+    "prepack": "yarn build",
+    "clean": "rimraf -rf build && rimraf tsconfig.tsbuildinfo && rimraf coverage",
+    "format": "prettier --write \"{src,__tests__}/**/*.ts\"",
     "lint": "eslint . --ext .ts",
-    "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js dist/",
+    "copy-content-files": "copyfiles -u 1 src/**/*.d.ts src/**/*.proto src/**/*.js build/",
     "compile": "tsc --build",
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile && yarn copy-content-files",
+    "codegen": "buf generate",
     "dev": "ts-node ./src/dev.ts",
-    "prepublishOnly": "yarn build",
-    "push": "buf push ./proto",
-    "gen": "buf push ./proto",
-    "test": "jest \".*\\.(spec|test)\\.ts$\" --coverage",
-    "test:e2e": "jest \"test/.*\\.e2e\\.ts$\" --coverage --forceExit --runInBand",
-    "pub": "lerna publish --no-verify-access"
+    "test": "yarn test:samples && jest \".*\\.(spec|test)\\.ts$\" --coverage",
+    "test:e2e": "jest \".*\\.(e2e)\\.ts$\" --coverage",
+    "pub": "lerna publish --no-verify-access",
+    "test:samples": "tsc --project tsconfig.samples.json"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.6.1",
+    "axios": "^1.1.3",
+    "google-protobuf": "^3.20.0",
+    "lodash": "^4.17.21",
+    "node-cache": "^5.1.2",
+    "rxjs": "^7.5.5"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
@@ -53,10 +62,5 @@
     "ts-node": "^10.3.1",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.4.4"
-  },
-  "dependencies": {
-    "@grpc/grpc-js": "^1.6.1",
-    "google-protobuf": "^3.20.0",
-    "rxjs": "^7.5.5"
   }
 }

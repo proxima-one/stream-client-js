@@ -33,12 +33,15 @@ lib-cov
 coverage
 *.lcov
 
+# test snapshots
+test/interop/__snapshots__/
+
 # nyc test coverage
 .nyc_output
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
-
+build/
 # Bower dependency directory (https://bower.io/)
 bower_components
 
@@ -51,6 +54,10 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+
+# Misc
+# test/interop/__snapshots__
+
 
 # TypeScript v1 declaration files
 typings/
@@ -91,7 +98,7 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+build
 
 # Gatsby files
 .cache/
@@ -101,7 +108,7 @@ dist
 
 # vuepress build output
 .vuepress/dist
-
+.npmrc
 # Serverless directories
 .serverless/
 
@@ -113,3 +120,5 @@ dist
 
 # TernJS port file
 .tern-port
+
+dist

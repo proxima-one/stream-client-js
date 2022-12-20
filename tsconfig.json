@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "./build",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "jsx": "react",
@@ -22,9 +22,11 @@
   },
   "exclude": [
     "node_modules",
+    "build",
     "**/__mocks__/*",
     "**/__tests__/*",
     "**/*.spec.ts",
+    "**/*.e2e.ts",
     "**/*.test.ts"
   ],
   "include": [
