@@ -1,6 +1,6 @@
 import { Axios } from "axios";
 import { Offset, Stream, StreamEndpoint, StreamMetadata } from "../model";
-import { execAndReturnWithRetry, mapLookup, Parsing } from "../utils";
+import { execAndReturnWithRetry, mapLookup } from "../utils";
 import { StreamRegistry } from "./streamRegistry";
 
 export interface StreamRegistryOptions {
@@ -27,7 +27,8 @@ export class StreamRegistryClient implements StreamRegistry {
   ) {
     this.client = new Axios({
       baseURL: options.endpoint,
-      validateStatus: status => status >= 200 && status < 300,
+      validateStatus: status =>
+        (status >= 200 && status < 300) || status == 404,
     });
   }
 
@@ -41,6 +42,9 @@ export class StreamRegistryClient implements StreamRegistry {
           `/streams/${stream}/offsets/${offset.toString()}/endpoints`
         )
     );
+
+    if (resp.status == 404) return [];
+
     return parseStreamEndpoints(JSON.parse(resp.data));
   }
 
@@ -53,20 +57,23 @@ export class StreamRegistryClient implements StreamRegistry {
           },
         })
     );
+
+    if (resp.status == 404) return [];
+
     return parseStreams(JSON.parse(resp.data));
   }
 
   public async getStreams(): Promise<Stream[]> {
     const resp = await this.call(async () => await this.client.get(`/streams`));
+
+    if (resp.status == 404) return [];
+
     return parseStreams(JSON.parse(resp.data));
   }
 
   public async findStream(stream: string): Promise<Stream | undefined> {
     const resp = await this.call(
-      async () =>
-        await this.client.get(`/streams/${stream}`, {
-          validateStatus: x => x != 404,
-        })
+      async () => await this.client.get(`/streams/${stream}`)
     );
 
     if (resp.status == 404 || resp.data == undefined) return undefined;
@@ -76,24 +83,27 @@ export class StreamRegistryClient implements StreamRegistry {
 
   public async findOffset(
     stream: string,
-    height?: number,
-    timestampMs?: number
+    filter: {
+      height?: number;
+      timestampMs?: number;
+    }
   ): Promise<Offset | undefined> {
+    if (filter.height !== undefined && filter.timestampMs !== undefined)
+      throw new Error("Either height or timestampMs must be provided");
+
     const resp = await this.call(
       async () =>
         await this.client.get(`/streams/${stream}/offsets/find`, {
           params: {
-            height: height,
-            timestamp: timestampMs,
+            height: filter.height,
+            timestamp: filter.timestampMs,
           },
         })
     );
 
     if (resp.status == 404 || resp.data == undefined) return undefined;
 
-    return Offset.fromString(
-      Parsing.parseStringProperty(JSON.parse(resp.data), "id")
-    );
+    return Offset.fromString(JSON.parse(resp.data).id);
   }
 
   private async call<T>(func: () => Promise<T>) {
@@ -105,46 +115,38 @@ export class StreamRegistryClient implements StreamRegistry {
   }
 }
 
-function parseStreams(data: unknown): Stream[] {
-  const items = Parsing.parseArrayProperty(data, "items");
-  return items.map(parseStream);
+function parseStreams(data: any): Stream[] {
+  return (data.items as []).map(parseStream);
 }
 
-function parseStream(data: unknown): Stream {
-  const metadata = Parsing.parseProperty(data, "metadata");
-  const endpoints = Parsing.parsePropertyOrNull(data, "endpoints") as Record<
-    string,
-    unknown
-  >;
+function parseStream(data: any): Stream {
+  const metadata = data.metadata;
+  const endpoints = data.endpoints as Record<string, any>;
 
   return new Stream(
-    Parsing.parseStringProperty(data, "name"),
+    data.name,
     new StreamMetadata(
-      Parsing.parseStringOrNullProperty(metadata, "description") ?? "",
-      (Parsing.parseProperty(metadata, "labels") ?? {}) as Record<
-        string,
-        string
-      >
+      metadata.description ?? "",
+      (metadata.labels ?? {}) as Record<string, string>
     ),
     endpoints ? mapLookup(endpoints, parseStreamEndpoint) : {}
   );
 }
 
-function parseStreamEndpoints(data: unknown): StreamEndpoint[] {
-  const items = Parsing.parseArrayProperty(data, "items");
-  return items.map(parseStreamEndpoint);
+function parseStreamEndpoints(data: any): StreamEndpoint[] {
+  return data.items.map(parseStreamEndpoint);
 }
 
-function parseStreamEndpoint(endpoint: unknown): StreamEndpoint {
-  const stats = Parsing.parseProperty(endpoint, "stats");
+function parseStreamEndpoint(endpoint: any): StreamEndpoint {
+  const stats = endpoint.stats;
 
   return {
-    uri: Parsing.parseStringProperty(endpoint, "uri"),
+    uri: endpoint.uri,
     stats: {
-      start: Offset.fromString(Parsing.parseStringProperty(stats, "start")),
-      end: Offset.fromString(Parsing.parseStringProperty(stats, "end")),
-      length: Parsing.parseNumberProperty(stats, "length"),
-      storageSize: Parsing.parseNumberProperty(stats, "storageSize"),
+      start: Offset.fromString(stats.start),
+      end: Offset.fromString(stats.end),
+      length: stats.length,
+      storageSize: stats.storageSize,
     },
   };
 }

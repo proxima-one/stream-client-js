@@ -1,7 +1,7 @@
 export function barrier(resourcesCount: number = 1): Barrier {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   let unlock = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
   let unlockWithError = (err: any) => {};
 
   let resourcesLeft = resourcesCount;

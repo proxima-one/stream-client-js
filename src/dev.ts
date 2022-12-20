@@ -1,9 +1,5 @@
 import { Offset } from "./model";
-import {
-  ProximaStreamClient,
-  SingleStreamDbRegistry,
-  StreamRegistryClient,
-} from "./client";
+import { ProximaStreamClient, StreamRegistryClient } from "./client";
 import { BufferedStreamReader } from "./lib/reader";
 import { sleep } from "./utils";
 
@@ -17,6 +13,8 @@ async function main() {
   const client = new ProximaStreamClient();
 
   const streamRegistry = new StreamRegistryClient();
+  const endpoints = await streamRegistry.getStreamEndpoints("abc", Offset.zero);
+  console.log("ENDPOINTS", endpoints);
   const allStreams = await streamRegistry.getStreams();
   console.dir(allStreams, { depth: 10 });
 

@@ -5,7 +5,9 @@ export class SingleStreamDbRegistry implements StreamRegistry {
   public constructor(private readonly streamDbUrl: string) {}
 
   public async getStreamEndpoints(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     streamName: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     offset: Offset
   ): Promise<StreamEndpoint[]> {
     // assume single streamdb has all requested streams
