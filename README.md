@@ -14,6 +14,11 @@ Install the dependencies and devDependencies.
 yarn install
 ```
 
+## Relevant Links 
+To get a simple look at streams without using the client you can check out these quick links:
+- Stream Registry: [https://streams.proxima.one]
+- Streams API Documentation: [https://streams.api.proxima.one]
+
 ## Client Usage
 
 ### Reading the stream from the beginning
@@ -96,8 +101,6 @@ while (true) {
 ## Concepts
 
 In order to fully understand the client design you should first learn some facts about the event streams themselves.
-
-TODO: add link to Proxima documentation
 
 ![Fork illustration](resources/handling-reorgs.png)
 
