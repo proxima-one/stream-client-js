@@ -96,4 +96,13 @@ describe("ProximaStreamClient", () => {
     expect(nextEvents).toMatchSnapshot();
     expect(nextEvents.length).toBe(100);
   });
+
+  it("should return zero events if fetching from zero with last direction", async () => {
+    const streamDbUri = "streams.buh.apps.proxima.one:443";
+    const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(streamDbUri)});
+    const offset = Offset.zero;
+    const count = 100;
+    const lastEvents = await client.fetchEvents(testStream, offset, count, "last")
+    expect(lastEvents).toHaveLength(0);
+  });
 });
