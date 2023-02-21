@@ -34,9 +34,7 @@ export function protoToOffset(offsetProto: proto_model.Offset): Offset {
   return new Offset(
     offsetProto.id,
     BigInt(offsetProto.height),
-    offsetProto.timestamp
-      ? Timestamp.fromEpochMs(offsetProto.timestamp.epochMs)
-      : Timestamp.zero
+    offsetProto.timestamp ? protoToTimestamp(offsetProto.timestamp) : Timestamp.zero
   );
 }
 export function offsetToProto(offset: Offset): proto_model.Offset {

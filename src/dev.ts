@@ -13,15 +13,13 @@ async function main() {
   const client = new ProximaStreamClient();
 
   const streamRegistry = new StreamRegistryClient();
-  const endpoints = await streamRegistry.getStreamEndpoints("abc", Offset.zero);
-  console.log("ENDPOINTS", endpoints);
+  const endpoints = await streamRegistry.getStreamEndpoints("proxima.exchange-rates.0_1", Offset.zero);
   const allStreams = await streamRegistry.getStreams();
-  console.dir(allStreams, { depth: 10 });
 
   let currentOffset = Offset.zero;
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     const events = await client.fetchEvents(
-      "proxima.eth-main.blocks.1_0",
+      "proxima.exchange-rates.0_1",
       currentOffset,
       100,
       "next"
@@ -34,7 +32,7 @@ async function main() {
   console.log("starting the stream");
 
   const stream = await client.streamEvents(
-    "proxima.eth-main.blocks.1_0",
+    "proxima.exchange-rates.0_1",
     Offset.zero
   );
   const reader = BufferedStreamReader.fromStream(stream, 10000);
