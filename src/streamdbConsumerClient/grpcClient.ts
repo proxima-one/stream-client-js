@@ -1,12 +1,14 @@
 import {
-  Direction,
+  StreamConsumerServiceClient,
   GetStateTransitionsRequest,
-  StreamConsumerServiceClient, StreamStateTransitionsRequest
+  Direction,
+  StreamStateTransitionsRequest,
 } from "../gen/stream_consumer/v1alpha1/stream_consumer";
+import { offsetToProto, stateTransitionProtoToStreamEvent } from "../streamdb/converters";
 import * as grpc from "@grpc/grpc-js";
-import {Offset, StreamEvent} from "../model";
-import {offsetToProto, stateTransitionProtoToStreamEvent} from "../streamdb/converters";
-import {PausableStream, StreamController} from "../lib/pausableStream";
+import { StreamEvent, Offset } from "../model";
+
+import { PausableStream, StreamController } from "../lib/pausableStream";
 import {StreamDBConsumerClient} from "./consumerClient";
 
 export class StreamDBConsumerGrpcClient implements StreamDBConsumerClient {
