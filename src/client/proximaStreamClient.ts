@@ -134,7 +134,7 @@ export class ProximaStreamClient {
   private getStreamConsumerClient(endpoint: StreamEndpoint) {
     return (
       this.clients[endpoint.uri] ??
-      (this.clients[endpoint.uri] = new StreamDBConsumerHttpClient(endpoint.httpUri ?? endpoint.uri))
+      (this.clients[endpoint.uri] = new StreamDBConsumerHttpClient(endpoint.httpUri ?? endpoint.uri)) // todo: throw?
     );
   }
 }
