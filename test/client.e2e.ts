@@ -3,6 +3,7 @@ import { strict as assert } from "assert";
 import { firstValueFrom, take, toArray } from "rxjs";
 
 const testStream = "proxima.eth-main.blocks.1_0"
+const streamDbUri = "streams-mirror.buh.apps.proxima.one:443";
 
 describe("StreamRegistryClient", () => {
   it("should get all streams", async () => {
@@ -87,7 +88,6 @@ describe("ProximaStreamClient", () => {
   });
 
   it("should fetch events from existing stream and provided single streamdb instance", async () => {
-    const streamDbUri = "streams.buh.apps.proxima.one:443";
     const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(streamDbUri)});
     const offset = Offset.zero;
     const count = 100;
@@ -98,7 +98,6 @@ describe("ProximaStreamClient", () => {
   });
 
   it("should return zero events if fetching from zero with last direction", async () => {
-    const streamDbUri = "streams.buh.apps.proxima.one:443";
     const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(streamDbUri)});
     const offset = Offset.zero;
     const count = 100;
