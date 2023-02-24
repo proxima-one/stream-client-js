@@ -1,6 +1,6 @@
 {
   "name": "@proximaone/stream-client-js",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Proxima Streams client library",
   "main": "build/index.js",
   "types": "build/index.d.ts",
