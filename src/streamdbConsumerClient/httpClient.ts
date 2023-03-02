@@ -14,7 +14,7 @@ export class StreamDBConsumerHttpClient implements StreamDBConsumerClient {
 
   constructor(private readonly uri: string) {
     this.client = new Axios({
-      baseURL: this.uri,
+      baseURL: "https://" + this.uri,
       validateStatus: status =>
         (status >= 200 && status < 300) || status == 404,
     });
@@ -61,11 +61,7 @@ export class StreamDBConsumerHttpClient implements StreamDBConsumerClient {
   }
 }
 
-function webSocketUriForOffset(httpEndpoint: string, streamId: string, offset: Offset): string {
-  const wsEndpoint = httpEndpoint
-    .replace("https://", "wss://")
-    .replace("http://", "ws://");
-
+function webSocketUriForOffset(endpoint: string, streamId: string, offset: Offset): string {
   const params = new URLSearchParams({
     "offset.height": offset.height.toString(),
     "offset.timestamp.epochMs": offset.timestamp.epochMs.toString(),
@@ -74,5 +70,5 @@ function webSocketUriForOffset(httpEndpoint: string, streamId: string, offset: O
   // creates "&offset.timestamp.parts=parts[0]&offset.timestamp.parts=parts[1]" etc. string
   const parts = ["", ...offset.timestamp.parts].join("&offset.timestamp.parts=");
 
-  return `${wsEndpoint}/api/consumer/${streamId}/stream?${params.toString()}${parts}`;
+  return `wss://${endpoint}/api/consumer/${streamId}/stream?${params.toString()}${parts}`;
 }
