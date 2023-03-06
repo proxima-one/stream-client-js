@@ -1,5 +1,5 @@
 import { StreamDBConsumerClient } from "../streamdbConsumerClient/consumerClient";
-import { StreamDBConsumerHttpClient } from "../streamdbConsumerClient/httpClient";
+import { getConsumerClientFactory } from "./getConsumerClientFactory";
 import { PausableStream, SimplePauseController } from "../lib/pausableStream";
 import { Offset, StreamEndpoint, StreamEvent } from "../model";
 import { StreamRegistryClient } from "./streamRegistryClient";
@@ -132,9 +132,21 @@ export class ProximaStreamClient {
   }
 
   private getStreamConsumerClient(endpoint: StreamEndpoint) {
+    const createClient = () => {
+      if (endpoint.uri && consumerClientFactory["grpc"]) {
+        return consumerClientFactory.grpc(endpoint.uri);
+      }
+
+      if (endpoint.httpUri && consumerClientFactory["http"]) {
+        return consumerClientFactory.http(endpoint.httpUri);
+      }
+
+      throw new Error(`can't create client for ${JSON.stringify(endpoint)}`);
+    };
+
     return (
       this.clients[endpoint.uri] ??
-      (this.clients[endpoint.uri] = new StreamDBConsumerHttpClient(endpoint.httpUri ?? endpoint.uri)) // todo: throw?
+      (this.clients[endpoint.uri] = createClient())
     );
   }
 }
@@ -142,3 +154,7 @@ export class ProximaStreamClient {
 export interface StreamClientOptions {
   registry?: StreamRegistry;
 }
+
+const consumerClientFactory: Partial<
+  Record<"http" | "grpc", (endpoint: string) => StreamDBConsumerClient>
+> = getConsumerClientFactory();

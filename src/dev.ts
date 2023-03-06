@@ -43,8 +43,8 @@ async function main() {
 
     console.log(
       `doing some stuff with a batch of ${batch.length}. ${batch[
-        batch.length - 1
-      ].offset.toString()}`
+      batch.length - 1
+        ].offset.toString()}`
     );
     // simulate processing
     await sleep(100);
