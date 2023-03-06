@@ -12,6 +12,7 @@
     "outDir": "./build",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
+    "allowJs": true,
     "jsx": "react",
     "strict": true,
     "declaration": true,

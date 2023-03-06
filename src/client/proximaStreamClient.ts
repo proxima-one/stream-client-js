@@ -1,4 +1,5 @@
-import { StreamDBConsumerClient } from "../streamdb/consumerClient";
+import { StreamDBConsumerClient } from "../streamdbConsumerClient/consumerClient";
+import { getConsumerClientFactory } from "./getConsumerClientFactory";
 import { PausableStream, SimplePauseController } from "../lib/pausableStream";
 import { Offset, StreamEndpoint, StreamEvent } from "../model";
 import { StreamRegistryClient } from "./streamRegistryClient";
@@ -35,7 +36,7 @@ export class ProximaStreamClient {
         `Can't fetch events for stream ${stream} ${offset.toString()}: no endpoints found`
       );
 
-    const client = this.getStreamConsumerClient(endpoint.uri);
+    const client = this.getStreamConsumerClient(endpoint);
     const events = await client.getEvents(stream, offset, count, direction);
 
     // store last event's offset endpoint to the cache
@@ -79,7 +80,7 @@ export class ProximaStreamClient {
         }
 
         //new StreamDBConsumerClient(endpoint)
-        const client = this.getStreamConsumerClient(endpoint.uri);
+        const client = this.getStreamConsumerClient(endpoint);
         currentEventStream = client.getEventsStream(
           stream,
           currentOffset,
@@ -130,10 +131,22 @@ export class ProximaStreamClient {
     return endpoint;
   }
 
-  private getStreamConsumerClient(endpoint: string) {
+  private getStreamConsumerClient(endpoint: StreamEndpoint) {
+    const createClient = () => {
+      if (endpoint.uri && consumerClientFactory["grpc"]) {
+        return consumerClientFactory.grpc(endpoint.uri);
+      }
+
+      if (endpoint.httpUri && consumerClientFactory["http"]) {
+        return consumerClientFactory.http(endpoint.httpUri);
+      }
+
+      throw new Error(`can't create client for ${JSON.stringify(endpoint)}`);
+    };
+
     return (
-      this.clients[endpoint] ??
-      (this.clients[endpoint] = new StreamDBConsumerClient(endpoint))
+      this.clients[endpoint.uri] ??
+      (this.clients[endpoint.uri] = createClient())
     );
   }
 }
@@ -141,3 +154,7 @@ export class ProximaStreamClient {
 export interface StreamClientOptions {
   registry?: StreamRegistry;
 }
+
+const consumerClientFactory: Partial<
+  Record<"http" | "grpc", (endpoint: string) => StreamDBConsumerClient>
+> = getConsumerClientFactory();

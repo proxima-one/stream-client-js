@@ -47,7 +47,8 @@ export class StreamStats {
 export class StreamEndpoint {
   public constructor(
     public readonly uri: string,
-    public readonly stats: StreamStats
+    public readonly stats: StreamStats,
+    public readonly httpUri?: string,
   ) {}
 }
 

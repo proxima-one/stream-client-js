@@ -142,6 +142,7 @@ function parseStreamEndpoint(endpoint: any): StreamEndpoint {
 
   return {
     uri: endpoint.uri,
+    httpUri: endpoint.httpUri,
     stats: {
       start: Offset.fromString(stats.start),
       end: Offset.fromString(stats.end),
