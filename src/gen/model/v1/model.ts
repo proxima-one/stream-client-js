@@ -50,10 +50,7 @@ function createBaseOffset(): Offset {
 }
 
 export const Offset = {
-  encode(
-    message: Offset,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: Offset, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -94,9 +91,7 @@ export const Offset = {
     return {
       id: isSet(object.id) ? String(object.id) : "",
       height: isSet(object.height) ? Number(object.height) : 0,
-      timestamp: isSet(object.timestamp)
-        ? Timestamp.fromJSON(object.timestamp)
-        : undefined,
+      timestamp: isSet(object.timestamp) ? Timestamp.fromJSON(object.timestamp) : undefined,
     };
   },
 
@@ -105,20 +100,21 @@ export const Offset = {
     message.id !== undefined && (obj.id = message.id);
     message.height !== undefined && (obj.height = Math.round(message.height));
     message.timestamp !== undefined &&
-      (obj.timestamp = message.timestamp
-        ? Timestamp.toJSON(message.timestamp)
-        : undefined);
+      (obj.timestamp = message.timestamp ? Timestamp.toJSON(message.timestamp) : undefined);
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Offset>, I>>(base?: I): Offset {
+    return Offset.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<Offset>, I>>(object: I): Offset {
     const message = createBaseOffset();
     message.id = object.id ?? "";
     message.height = object.height ?? 0;
-    message.timestamp =
-      object.timestamp !== undefined && object.timestamp !== null
-        ? Timestamp.fromPartial(object.timestamp)
-        : undefined;
+    message.timestamp = (object.timestamp !== undefined && object.timestamp !== null)
+      ? Timestamp.fromPartial(object.timestamp)
+      : undefined;
     return message;
   },
 };
@@ -128,10 +124,7 @@ function createBaseTimestamp(): Timestamp {
 }
 
 export const Timestamp = {
-  encode(
-    message: Timestamp,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: Timestamp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.epochMs !== 0) {
       writer.uint32(8).int64(message.epochMs);
     }
@@ -165,30 +158,29 @@ export const Timestamp = {
   fromJSON(object: any): Timestamp {
     return {
       epochMs: isSet(object.epochMs) ? Number(object.epochMs) : 0,
-      parts: Array.isArray(object?.parts)
-        ? object.parts.map((e: any) => String(e))
-        : [],
+      parts: Array.isArray(object?.parts) ? object.parts.map((e: any) => String(e)) : [],
     };
   },
 
   toJSON(message: Timestamp): unknown {
     const obj: any = {};
-    message.epochMs !== undefined &&
-      (obj.epochMs = Math.round(message.epochMs));
+    message.epochMs !== undefined && (obj.epochMs = Math.round(message.epochMs));
     if (message.parts) {
-      obj.parts = message.parts.map(e => e);
+      obj.parts = message.parts.map((e) => e);
     } else {
       obj.parts = [];
     }
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<Timestamp>, I>>(
-    object: I
-  ): Timestamp {
+  create<I extends Exact<DeepPartial<Timestamp>, I>>(base?: I): Timestamp {
+    return Timestamp.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<Timestamp>, I>>(object: I): Timestamp {
     const message = createBaseTimestamp();
     message.epochMs = object.epochMs ?? 0;
-    message.parts = object.parts?.map(e => e) || [];
+    message.parts = object.parts?.map((e) => e) || [];
     return message;
   },
 };
@@ -237,12 +229,8 @@ export const Event = {
 
   fromJSON(object: any): Event {
     return {
-      timestamp: isSet(object.timestamp)
-        ? Timestamp.fromJSON(object.timestamp)
-        : undefined,
-      payload: isSet(object.payload)
-        ? bytesFromBase64(object.payload)
-        : new Uint8Array(),
+      timestamp: isSet(object.timestamp) ? Timestamp.fromJSON(object.timestamp) : undefined,
+      payload: isSet(object.payload) ? bytesFromBase64(object.payload) : new Uint8Array(),
       undo: isSet(object.undo) ? Boolean(object.undo) : false,
     };
   },
@@ -250,23 +238,22 @@ export const Event = {
   toJSON(message: Event): unknown {
     const obj: any = {};
     message.timestamp !== undefined &&
-      (obj.timestamp = message.timestamp
-        ? Timestamp.toJSON(message.timestamp)
-        : undefined);
+      (obj.timestamp = message.timestamp ? Timestamp.toJSON(message.timestamp) : undefined);
     message.payload !== undefined &&
-      (obj.payload = base64FromBytes(
-        message.payload !== undefined ? message.payload : new Uint8Array()
-      ));
+      (obj.payload = base64FromBytes(message.payload !== undefined ? message.payload : new Uint8Array()));
     message.undo !== undefined && (obj.undo = message.undo);
     return obj;
   },
 
+  create<I extends Exact<DeepPartial<Event>, I>>(base?: I): Event {
+    return Event.fromPartial(base ?? {});
+  },
+
   fromPartial<I extends Exact<DeepPartial<Event>, I>>(object: I): Event {
     const message = createBaseEvent();
-    message.timestamp =
-      object.timestamp !== undefined && object.timestamp !== null
-        ? Timestamp.fromPartial(object.timestamp)
-        : undefined;
+    message.timestamp = (object.timestamp !== undefined && object.timestamp !== null)
+      ? Timestamp.fromPartial(object.timestamp)
+      : undefined;
     message.payload = object.payload ?? new Uint8Array();
     message.undo = object.undo ?? false;
     return message;
@@ -278,10 +265,7 @@ function createBaseStateTransition(): StateTransition {
 }
 
 export const StateTransition = {
-  encode(
-    message: StateTransition,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: StateTransition, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.from !== undefined) {
       Offset.encode(message.from, writer.uint32(10).fork()).ldelim();
     }
@@ -328,31 +312,21 @@ export const StateTransition = {
 
   toJSON(message: StateTransition): unknown {
     const obj: any = {};
-    message.from !== undefined &&
-      (obj.from = message.from ? Offset.toJSON(message.from) : undefined);
-    message.to !== undefined &&
-      (obj.to = message.to ? Offset.toJSON(message.to) : undefined);
-    message.event !== undefined &&
-      (obj.event = message.event ? Event.toJSON(message.event) : undefined);
+    message.from !== undefined && (obj.from = message.from ? Offset.toJSON(message.from) : undefined);
+    message.to !== undefined && (obj.to = message.to ? Offset.toJSON(message.to) : undefined);
+    message.event !== undefined && (obj.event = message.event ? Event.toJSON(message.event) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<StateTransition>, I>>(
-    object: I
-  ): StateTransition {
+  create<I extends Exact<DeepPartial<StateTransition>, I>>(base?: I): StateTransition {
+    return StateTransition.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<StateTransition>, I>>(object: I): StateTransition {
     const message = createBaseStateTransition();
-    message.from =
-      object.from !== undefined && object.from !== null
-        ? Offset.fromPartial(object.from)
-        : undefined;
-    message.to =
-      object.to !== undefined && object.to !== null
-        ? Offset.fromPartial(object.to)
-        : undefined;
-    message.event =
-      object.event !== undefined && object.event !== null
-        ? Event.fromPartial(object.event)
-        : undefined;
+    message.from = (object.from !== undefined && object.from !== null) ? Offset.fromPartial(object.from) : undefined;
+    message.to = (object.to !== undefined && object.to !== null) ? Offset.fromPartial(object.to) : undefined;
+    message.event = (object.event !== undefined && object.event !== null) ? Event.fromPartial(object.event) : undefined;
     return message;
   },
 };
@@ -362,10 +336,7 @@ function createBaseStream(): Stream {
 }
 
 export const Stream = {
-  encode(
-    message: Stream,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: Stream, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -413,38 +384,31 @@ export const Stream = {
       id: isSet(object.id) ? String(object.id) : "",
       start: isSet(object.start) ? Offset.fromJSON(object.start) : undefined,
       end: isSet(object.end) ? Offset.fromJSON(object.end) : undefined,
-      userData: isSet(object.userData)
-        ? bytesFromBase64(object.userData)
-        : undefined,
+      userData: isSet(object.userData) ? bytesFromBase64(object.userData) : undefined,
     };
   },
 
   toJSON(message: Stream): unknown {
     const obj: any = {};
     message.id !== undefined && (obj.id = message.id);
-    message.start !== undefined &&
-      (obj.start = message.start ? Offset.toJSON(message.start) : undefined);
-    message.end !== undefined &&
-      (obj.end = message.end ? Offset.toJSON(message.end) : undefined);
+    message.start !== undefined && (obj.start = message.start ? Offset.toJSON(message.start) : undefined);
+    message.end !== undefined && (obj.end = message.end ? Offset.toJSON(message.end) : undefined);
     message.userData !== undefined &&
-      (obj.userData =
-        message.userData !== undefined
-          ? base64FromBytes(message.userData)
-          : undefined);
+      (obj.userData = message.userData !== undefined ? base64FromBytes(message.userData) : undefined);
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Stream>, I>>(base?: I): Stream {
+    return Stream.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<Stream>, I>>(object: I): Stream {
     const message = createBaseStream();
     message.id = object.id ?? "";
-    message.start =
-      object.start !== undefined && object.start !== null
-        ? Offset.fromPartial(object.start)
-        : undefined;
-    message.end =
-      object.end !== undefined && object.end !== null
-        ? Offset.fromPartial(object.end)
-        : undefined;
+    message.start = (object.start !== undefined && object.start !== null)
+      ? Offset.fromPartial(object.start)
+      : undefined;
+    message.end = (object.end !== undefined && object.end !== null) ? Offset.fromPartial(object.end) : undefined;
     message.userData = object.userData ?? undefined;
     return message;
   },
@@ -455,10 +419,7 @@ function createBaseStreamStateRef(): StreamStateRef {
 }
 
 export const StreamStateRef = {
-  encode(
-    message: StreamStateRef,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+  encode(message: StreamStateRef, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.streamId !== "") {
       writer.uint32(10).string(message.streamId);
     }
@@ -499,20 +460,20 @@ export const StreamStateRef = {
   toJSON(message: StreamStateRef): unknown {
     const obj: any = {};
     message.streamId !== undefined && (obj.streamId = message.streamId);
-    message.offset !== undefined &&
-      (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
+    message.offset !== undefined && (obj.offset = message.offset ? Offset.toJSON(message.offset) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<StreamStateRef>, I>>(
-    object: I
-  ): StreamStateRef {
+  create<I extends Exact<DeepPartial<StreamStateRef>, I>>(base?: I): StreamStateRef {
+    return StreamStateRef.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<StreamStateRef>, I>>(object: I): StreamStateRef {
     const message = createBaseStreamStateRef();
     message.streamId = object.streamId ?? "";
-    message.offset =
-      object.offset !== undefined && object.offset !== null
-        ? Offset.fromPartial(object.offset)
-        : undefined;
+    message.offset = (object.offset !== undefined && object.offset !== null)
+      ? Offset.fromPartial(object.offset)
+      : undefined;
     return message;
   },
 };
@@ -569,29 +530,21 @@ export const State = {
 
   toJSON(message: State): unknown {
     const obj: any = {};
-    message.from !== undefined &&
-      (obj.from = message.from ? Offset.toJSON(message.from) : undefined);
-    message.to !== undefined &&
-      (obj.to = message.to ? Offset.toJSON(message.to) : undefined);
-    message.event !== undefined &&
-      (obj.event = message.event ? Event.toJSON(message.event) : undefined);
+    message.from !== undefined && (obj.from = message.from ? Offset.toJSON(message.from) : undefined);
+    message.to !== undefined && (obj.to = message.to ? Offset.toJSON(message.to) : undefined);
+    message.event !== undefined && (obj.event = message.event ? Event.toJSON(message.event) : undefined);
     return obj;
+  },
+
+  create<I extends Exact<DeepPartial<State>, I>>(base?: I): State {
+    return State.fromPartial(base ?? {});
   },
 
   fromPartial<I extends Exact<DeepPartial<State>, I>>(object: I): State {
     const message = createBaseState();
-    message.from =
-      object.from !== undefined && object.from !== null
-        ? Offset.fromPartial(object.from)
-        : undefined;
-    message.to =
-      object.to !== undefined && object.to !== null
-        ? Offset.fromPartial(object.to)
-        : undefined;
-    message.event =
-      object.event !== undefined && object.event !== null
-        ? Event.fromPartial(object.event)
-        : undefined;
+    message.from = (object.from !== undefined && object.from !== null) ? Offset.fromPartial(object.from) : undefined;
+    message.to = (object.to !== undefined && object.to !== null) ? Offset.fromPartial(object.to) : undefined;
+    message.event = (object.event !== undefined && object.event !== null) ? Event.fromPartial(object.event) : undefined;
     return message;
   },
 };
@@ -599,7 +552,7 @@ export const State = {
 declare var self: any | undefined;
 declare var window: any | undefined;
 declare var global: any | undefined;
-var globalThis: any = (() => {
+var tsProtoGlobalThis: any = (() => {
   if (typeof globalThis !== "undefined") {
     return globalThis;
   }
@@ -616,10 +569,10 @@ var globalThis: any = (() => {
 })();
 
 function bytesFromBase64(b64: string): Uint8Array {
-  if (globalThis.Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  if (tsProtoGlobalThis.Buffer) {
+    return Uint8Array.from(tsProtoGlobalThis.Buffer.from(b64, "base64"));
   } else {
-    const bin = globalThis.atob(b64);
+    const bin = tsProtoGlobalThis.atob(b64);
     const arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; ++i) {
       arr[i] = bin.charCodeAt(i);
@@ -629,46 +582,31 @@ function bytesFromBase64(b64: string): Uint8Array {
 }
 
 function base64FromBytes(arr: Uint8Array): string {
-  if (globalThis.Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
+  if (tsProtoGlobalThis.Buffer) {
+    return tsProtoGlobalThis.Buffer.from(arr).toString("base64");
   } else {
     const bin: string[] = [];
-    arr.forEach(byte => {
+    arr.forEach((byte) => {
       bin.push(String.fromCharCode(byte));
     });
-    return globalThis.btoa(bin.join(""));
+    return tsProtoGlobalThis.btoa(bin.join(""));
   }
 }
 
-type Builtin =
-  | Date
-  | Function
-  | Uint8Array
-  | string
-  | number
-  | boolean
-  | undefined;
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin
-  ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & {
-      [K in Exclude<keyof I, KeysOfUnion<P>>]: never;
-    };
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+    throw new tsProtoGlobalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
   }
   return long.toNumber();
 }
