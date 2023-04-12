@@ -5,11 +5,12 @@ import { firstValueFrom, take, toArray } from "rxjs";
 const streamTests = [{
   stream: "proxima.eth-main.blocks.1_0",
   timestamp: 1438473608000,
+  streamDbUri: "streams-mirror.buh.apps.proxima.one:443",
 }, {
   stream: "proxima.exchange-rates.0_1",
   timestamp: 1438473600000,
+  streamDbUri: "streams.buh.apps.proxima.one:443",
 }];
-const streamDbUri = "0.0.0.0:50051";
 
 describe("StreamRegistryClient", () => {
   it("should get all streams", async () => {
@@ -97,7 +98,7 @@ describe("ProximaStreamClient", () => {
     });
 
     it("should fetch events from existing stream and provided single streamdb instance", async () => {
-      const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(streamDbUri)});
+      const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(test.streamDbUri)});
       const offset = Offset.zero;
       const count = 100;
 
@@ -107,7 +108,7 @@ describe("ProximaStreamClient", () => {
     });
 
     it("should return zero events if fetching from zero with last direction", async () => {
-      const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(streamDbUri)});
+      const client = new ProximaStreamClient({registry: new SingleStreamDbRegistry(test.streamDbUri)});
       const offset = Offset.zero;
       const count = 100;
       const lastEvents = await client.fetchEvents(test.stream, offset, count, "last")

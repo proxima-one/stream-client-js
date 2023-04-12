@@ -12,8 +12,7 @@ export interface StreamRegistryOptions {
 }
 
 const DefaultRegistryClientOptions: StreamRegistryOptions = {
-  endpoint: "http://localhost:7000/",
-  // endpoint: "https://streams.api.proxima.one",
+  endpoint: "https://streams.api.proxima.one",
   retryPolicy: {
     retryCount: 10,
     waitInMs: 300,
