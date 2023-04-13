@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.9](https://github.com/proxima-one/stream-client-js/compare/v1.2.8...v1.2.9) (2023-04-13)
+
+**Note:** Version bump only for package @proximaone/stream-client-js
+
+## [1.2.9](https://github.com/proxima-one/stream-client-js/compare/v1.2.8...v1.2.9) (2023-04-13)
+
+**Note:** Version bump only for package @proximaone/stream-client-js
+
 ## [1.2.8](https://github.com/proxima-one/stream-client-js/compare/v1.2.7...v1.2.8) (2023-03-17)
 
 **Note:** Version bump only for package @proximaone/stream-client-js
