@@ -72,6 +72,9 @@ export class StreamDBConsumerClient {
 
     return PausableStream.create<StreamEvent>((observer, pauseState) => {
       grpcStreamResponse.on("data", d => {
+        if (pauseState.isPaused && !grpcStreamResponse.isPaused()) {
+          grpcStreamResponse.pause();
+        }
         for (const obj of d.stateTransition) {
           observer.next(stateTransitionProtoToStreamEvent(obj));
         }
