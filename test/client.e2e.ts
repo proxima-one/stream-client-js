@@ -1,6 +1,6 @@
 import { Offset, ProximaStreamClient, StreamRegistryClient, StreamEndpoint } from "../src"
 import { strict as assert } from "assert";
-import { firstValueFrom, take, toArray } from "rxjs";
+import { EMPTY, Observable, firstValueFrom, isEmpty, lastValueFrom, take, timeout, toArray } from "rxjs";
 
 const streamTests = [{
   stream: "proxima.eth-main.blocks.1_0",
@@ -9,6 +9,23 @@ const streamTests = [{
   stream: "proxima.exchange-rates.0_1",
   timestamp: 1438473600000,
 }];
+
+async function getStats(registry: StreamRegistryClient, name: string): Promise<StreamEndpoint | undefined> {
+  const streams = await registry.getStreams();
+  for (const stream of streams) {
+    if (stream.name == name) {
+      return Object.values(stream.endpoints)[0];
+    }
+  }
+}
+
+async function emitsNothingFor<T>(observable: Observable<T>, time: number): Promise<boolean> {
+  return lastValueFrom(
+    observable
+      .pipe(timeout({each: time, with: () => EMPTY}))
+      .pipe(isEmpty())
+  );
+}
 
 describe("StreamRegistryClient", () => {
   it("should get all streams", async () => {
@@ -113,4 +130,16 @@ describe("ProximaStreamClient", () => {
       expect(lastEvents).toHaveLength(0);
     });
   }
+
+  it("should return zero events if fetching from last offset", async () => {
+    const stream = "proxima.exchange-rates.0_1";
+    const client = new ProximaStreamClient({registry});
+    const stats = await getStats(registry, stream);
+    expect(stats).not.toBeUndefined();
+    const pauseable = await client.streamEvents(stream, stats!.stats.end!);
+    const subscription = pauseable.observable.subscribe({error: e => fail(e)});
+    const empty = await emitsNothingFor(pauseable.observable, 1000);
+    expect(empty).toBeTruthy();
+    subscription.unsubscribe();
+  });
 });
