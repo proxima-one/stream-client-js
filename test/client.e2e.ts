@@ -80,7 +80,13 @@ describe("StreamRegistryClient", () => {
 describe("ProximaStreamClient", () => {
   jest.setTimeout(30000);
 
-  const registry = new StreamRegistryClient();
+  const registry = new StreamRegistryClient({
+    endpoint: "https://streams.api.proxima.one",
+    retryPolicy: {
+      retryCount: 0,
+      waitInMs: 300,
+    },
+  });
 
   for (const test of streamTests) {
     it("should fetch events of existing stream", async () => {
@@ -135,11 +141,13 @@ describe("ProximaStreamClient", () => {
     const stream = "proxima.exchange-rates.0_1";
     const client = new ProximaStreamClient({registry});
     const stats = await getStats(registry, stream);
-    expect(stats).not.toBeUndefined();
+    console.log(`Endpoint: ${stats?.uri}`);
+    expect(stats?.stats.end).not.toBeUndefined();
+    console.log(`Offset: ${stats!.stats.end!}`);
     const pauseable = await client.streamEvents(stream, stats!.stats.end!);
-    const subscription = pauseable.observable.subscribe({error: e => fail(e)});
+    const subscription = pauseable.observable.subscribe({next: e => console.dir(e), error: e => fail(e)});
     const empty = await emitsNothingFor(pauseable.observable, 1000);
-    expect(empty).toBeTruthy();
     subscription.unsubscribe();
+    expect(empty).toBeTruthy();
   });
 });
