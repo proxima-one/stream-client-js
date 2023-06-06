@@ -36,12 +36,12 @@ export async function execWithRetry(
   retryCount: number,
   waitInMs: number
 ): Promise<void> {
-  for (let i = 0; i < retryCount + 1; i++) {
+  for (let i = 0; i <= retryCount; i++) {
     try {
       await func();
       return;
     } catch (err) {
-      if (i == retryCount - 1) throw err;
+      if (i == retryCount) throw err;
       await sleep(waitInMs * (i + 1));
     }
   }
