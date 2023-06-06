@@ -9,6 +9,7 @@ export interface StreamRegistryOptions {
     retryCount: number;
     waitInMs: number;
   };
+  apiKey?: string;
 }
 
 const DefaultRegistryClientOptions: StreamRegistryOptions = {
@@ -29,6 +30,7 @@ export class StreamRegistryClient implements StreamRegistry {
       baseURL: options.endpoint,
       validateStatus: status =>
         (status >= 200 && status < 300) || status == 404,
+      headers: options.apiKey ? { "x-api-key": options.apiKey } : {},
     });
   }
 
