@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/proxima-one/stream-client-js/compare/v1.2.11...v1.3.0) (2023-06-06)
+
+### Features
+
+- pass an API key with the requests ([41109d6](https://github.com/proxima-one/stream-client-js/commit/41109d65f31ec819246375bcf6405f6041fe57ba))
+
+# [1.3.0](https://github.com/proxima-one/stream-client-js/compare/v1.2.11...v1.3.0) (2023-06-06)
+
+### Features
+
+- pass an API key with the requests ([41109d6](https://github.com/proxima-one/stream-client-js/commit/41109d65f31ec819246375bcf6405f6041fe57ba))
+
 ## [1.2.11](https://github.com/proxima-one/stream-client-js/compare/v1.2.10...v1.2.11) (2023-05-16)
 
 **Note:** Version bump only for package @proximaone/stream-client-js
