@@ -22,7 +22,7 @@ export class StreamDBConsumerClient {
       (opts, callback) => {
         const metadata = new grpc.Metadata();
         if (apiKey !== undefined) {
-          metadata.add("x-api-key", apiKey ?? "");
+          metadata.add("x-api-key", apiKey);
         }
         callback(null, metadata);
       }
