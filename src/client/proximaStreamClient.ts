@@ -20,7 +20,7 @@ export class ProximaStreamClient {
     }
   ) {
     this.registry = options.registry ?? new StreamRegistryClient();
-    this.apiKey = options.apiKey;
+    this.apiKey = options.apiKey ?? this.registry.getApiKey();
     this.clients = {};
     this.offsetsCache = new NodeCache({ maxKeys: 10 * 1000 * 1000 });
   }
