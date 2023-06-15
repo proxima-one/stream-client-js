@@ -22,6 +22,7 @@ const DefaultRegistryClientOptions: StreamRegistryOptions = {
 
 export class StreamRegistryClient implements StreamRegistry {
   private readonly client: Axios;
+  private readonly apiKey?: string;
 
   public constructor(
     private readonly options: StreamRegistryOptions = DefaultRegistryClientOptions
@@ -32,6 +33,11 @@ export class StreamRegistryClient implements StreamRegistry {
         (status >= 200 && status < 300) || status == 404,
       headers: options.apiKey ? { "x-api-key": options.apiKey } : {},
     });
+    this.apiKey = options.apiKey;
+  }
+
+  public getApiKey(): string | undefined {
+    return this.apiKey;
   }
 
   public async getStreamEndpoints(

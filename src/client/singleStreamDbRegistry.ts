@@ -4,6 +4,10 @@ import { Offset, StreamEndpoint, StreamStats } from "../model";
 export class SingleStreamDbRegistry implements StreamRegistry {
   public constructor(private readonly streamDbUrl: string) {}
 
+  public getApiKey(): string | undefined {
+    return undefined;
+  }
+
   public async getStreamEndpoints(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     streamName: string,

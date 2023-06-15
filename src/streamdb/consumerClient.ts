@@ -13,12 +13,26 @@ import { PausableStream, StreamController } from "../lib/pausableStream";
 export class StreamDBConsumerClient {
   private consumer: StreamConsumerServiceClient;
 
-  constructor(uri: string) {
-    const secure = uri.includes(":443");
-    const credentials = secure
+  constructor(uri: string, apiKey?: string) {
+    const isSecure = uri.includes(":443");
+    const channelCredentials = isSecure
       ? grpc.credentials.createSsl()
       : grpc.credentials.createInsecure();
-    this.consumer = new StreamConsumerServiceClient(uri, credentials, {
+    const callCredentials = grpc.credentials.createFromMetadataGenerator(
+      (opts, callback) => {
+        const metadata = new grpc.Metadata();
+        if (apiKey !== undefined) {
+          metadata.add("x-api-key", apiKey);
+        }
+        callback(null, metadata);
+      }
+    );
+    const mergedCredentials = grpc.credentials.combineChannelCredentials(
+      channelCredentials,
+      callCredentials
+    );
+
+    this.consumer = new StreamConsumerServiceClient(uri, mergedCredentials, {
       "grpc.keepalive_timeout_ms": 100 * 1000,
       "grpc.keepalive_time_ms": 100 * 1000,
       "grpc.keepalive_permit_without_calls": 1,

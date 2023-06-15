@@ -12,6 +12,7 @@ export class ProximaStreamClient {
   private readonly registry: StreamRegistry;
   private readonly clients: Record<string, StreamDBConsumerClient>;
   private readonly offsetsCache: NodeCache;
+  private readonly apiKey?: string;
 
   public constructor(
     private readonly options: StreamClientOptions = {
@@ -19,6 +20,7 @@ export class ProximaStreamClient {
     }
   ) {
     this.registry = options.registry ?? new StreamRegistryClient();
+    this.apiKey = options.apiKey ?? this.registry.getApiKey();
     this.clients = {};
     this.offsetsCache = new NodeCache({ maxKeys: 10 * 1000 * 1000 });
   }
@@ -133,11 +135,15 @@ export class ProximaStreamClient {
   private getStreamConsumerClient(endpoint: string) {
     return (
       this.clients[endpoint] ??
-      (this.clients[endpoint] = new StreamDBConsumerClient(endpoint))
+      (this.clients[endpoint] = new StreamDBConsumerClient(
+        endpoint,
+        this.apiKey
+      ))
     );
   }
 }
 
 export interface StreamClientOptions {
   registry?: StreamRegistry;
+  apiKey?: string;
 }
