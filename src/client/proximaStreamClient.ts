@@ -1,6 +1,6 @@
 import { StreamDBConsumerClient } from "../streamdb/consumerClient";
 import { PausableStream, SimplePauseController } from "../lib/pausableStream";
-import { Offset, StreamEndpoint, StreamEvent } from "../model";
+import { Offset, StreamEndpoint, StreamEvent, Timestamp } from "../model";
 import { StreamRegistryClient } from "./streamRegistryClient";
 import { StreamRegistry } from "./streamRegistry";
 import _ from "lodash";
@@ -111,6 +111,68 @@ export class ProximaStreamClient {
     }, controller);
   }
 
+
+  public async multipleStreamEvents(
+    streams: {stream: string,
+    offset: Offset}[]
+  ): Promise<PausableStream<StreamEvent>> {
+    const controller = new SimplePauseController();
+    return PausableStream.create<StreamEvent>(subscriber => {
+
+      const init = async (waitFor?: number) => {
+        if (waitFor) await sleep(waitFor);
+
+         const current = streams.reduce((acc: StreamCurrentState, curr) => {
+           acc[curr.stream] = { offset: curr.offset, events: [] };
+           return acc;
+         }, {});
+
+         while (true) {
+           let timestampTill = new Timestamp(Number.MAX_VALUE);
+           for (const streamItem of streams) {
+             const stream = streamItem.stream;
+
+             const events = current[stream].events.length > 0
+               ? current[stream].events
+               : await this.fetchEvents(
+                 stream,
+                 current[stream].offset,
+                 100,
+                 "next"
+               );
+
+             const offset = events[events.length - 1].offset;
+             current[stream].offset = offset;
+             current[stream].events = events;
+
+             if (offset.timestamp.lessThan(timestampTill)) {
+               timestampTill = offset.timestamp
+             }
+
+             console.log(`fetched till ${current[stream].offset.toString()}`);
+           }
+
+           for (const streamItem of streams) {
+             const stream = streamItem.stream;
+             const pausedEvents = [];
+             for (const event of current[stream].events) {
+               if (event.timestamp.lessThanOrEqual(timestampTill))
+                 subscriber.next(event);
+               else
+                 pausedEvents.push(event);
+             }
+
+             current[stream].events = pausedEvents;
+           }
+         }
+      };
+
+      init();
+
+      return () => { };
+    }, controller);
+  }
+
   private async findEndpointFor(
     stream: string,
     offset: Offset
@@ -146,4 +208,8 @@ export class ProximaStreamClient {
 export interface StreamClientOptions {
   registry?: StreamRegistry;
   apiKey?: string;
+}
+
+interface StreamCurrentState {
+  [key: string]: { offset: Offset, events: StreamEvent[] };
 }

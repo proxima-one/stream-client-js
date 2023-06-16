@@ -33,10 +33,16 @@ async function main() {
 
   console.log("starting the stream");
 
-  const stream = await client.streamEvents(
-    "proxima.eth-main.blocks.1_0",
-    Offset.zero
-  );
+  // const stream = await client.streamEvents(
+  //   "proxima.eth-main.blocks.1_0",
+  //   Offset.zero
+  // );
+  //
+  const stream = await client.multipleStreamEvents([
+    { stream: "proxima.eth-main.blocks.1_0", offset: Offset.zero },
+    { stream: "proxima.polygon-main.blocks.1_0", offset: Offset.zero },
+  ]);
+
   const reader = BufferedStreamReader.fromStream(stream, 10000);
 
   while (true) {
