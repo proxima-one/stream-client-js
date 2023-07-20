@@ -2,8 +2,6 @@ name: schedule-e2e-tests
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'
 
 jobs:
   tests-e2e:
